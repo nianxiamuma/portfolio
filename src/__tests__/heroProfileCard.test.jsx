@@ -1,6 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import fs from 'node:fs'
+import path from 'node:path'
 
 import HeroProfileCard from '../components/HeroProfileCard'
 import Petals from '../components/Petals'
@@ -16,6 +18,15 @@ const renderCard = () =>
   )
 
 describe('Hero 名片卡', () => {
+  it('头像文件真的落盘了（配置指向 ≠ 文件存在）', () => {
+    const rel = SITE.avatar.replace(/^\/+/, '')
+    const abs = path.resolve(process.cwd(), 'public', rel)
+    expect(fs.existsSync(abs)).toBe(true)
+    // JPEG 魔数：文件名可以随便改，内容不会骗人
+    const head = fs.readFileSync(abs).subarray(0, 3)
+    expect([...head]).toEqual([0xff, 0xd8, 0xff])
+  })
+
   it('渲染站点身份：头像、名字、拼音、签名', () => {
     renderCard()
     expect(screen.getByAltText(SITE.name)).toBeTruthy()

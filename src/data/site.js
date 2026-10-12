@@ -8,7 +8,8 @@ export const SITE = {
   romaji: 'NIANXIA MUMA',
   tagline: '把喜欢的东西，留在手边。',
   // 部署基路径（GitHub Pages 项目页形如 /repo/）；字符串资源路径必须手动拼上它
-  avatar: `${import.meta.env.BASE_URL}avatar.png`,
+  // 头像 2026-10-13 更换为 IMG_6742.JPG（存为 avatar.jpg；内容是 JPEG，别改成 .png 免得 MIME 与内容不符）
+  avatar: `${import.meta.env.BASE_URL}avatar.jpg`,
   email: '807273679@qq.com',
   /** Hero 名片卡上的快捷入口 */
   shortcuts: [
