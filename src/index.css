@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   只放「原子类表达不了」的部分：伪元素、keyframes、多值 text-shadow、
+   依赖上下文变量的组件类。其余视觉一律走 JSX 里的 Tailwind 类名。
+------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    @apply bg-void-950 text-slate-300 antialiased;
+    overflow-x: hidden;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::selection {
+    @apply bg-neon-violet/40 text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-void-950;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-void-600;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neon-violet/70;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-neon-lime/60 ring-offset-2 ring-offset-void-950;
+  }
+}
+
+@layer components {
+  /* 浮动胶囊导航 */
+  .floating-nav {
+    @apply rounded-full border border-white/[0.08] bg-void-950/55 backdrop-blur-xl;
+    box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.9);
+  }
+
+  /* 导航链接：细线从左展开 */
+  .nav-hover-btn {
+    @apply relative cursor-pointer text-[11px] uppercase tracking-[0.22em] text-slate-400 transition-colors duration-300 hover:text-white;
+  }
+
+  .nav-hover-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -0.35rem;
+    height: 1px;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background-image: linear-gradient(90deg, transparent, #edff66, transparent);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-hover-btn:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* 逐词 3D 进场（初始态；GSAP 负责归零） */
+  .animated-word {
+    opacity: 0;
+    transform: translate3d(10px, 51px, -60px) rotateY(60deg) rotateX(-40deg);
+    transform-origin: 50% 50% -150px;
+    will-change: opacity, transform;
+  }
+
+  /* 开场遮罩的分屏离场 */
+  .intro-panel-left.is-open {
+    animation: intro-leave-left 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.15s forwards;
+  }
+
+  .intro-panel-right.is-open {
+    animation: intro-leave-right 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.15s forwards;
+  }
+
+  /* 信封开合 */
+  .story-envelope-cta--open {
+    animation: fade-rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+}
+
+@layer utilities {
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* 霓虹灯管文字：多层 text-shadow 用 currentColor 跟随主题色 */
+  .neon-text {
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 0.8),
+      0 0 12px currentColor,
+      0 0 30px currentColor,
+      0 0 58px currentColor;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+@keyframes intro-leave-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-101%);
+  }
+}
+
+@keyframes intro-leave-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes indicator-bounce {
+  0%,
+  100% {
+    height: 0.25rem;
+  }
+  50% {
+    height: 1rem;
+  }
+}
+
+.indicator-line {
+  height: 0.35rem;
+  width: 1px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: height 0.3s linear;
+}
+
+.indicator-line.active {
+  animation: indicator-bounce 1s linear infinite;
+}
+
+/* 开场加载：三点脉冲 */
+.loader-dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.loader-dots span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: #edff66;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+
+.loader-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.loader-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot-pulse {
+  0%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 飘落花瓣（Hero 氛围层） */
+.petal {
+  position: absolute;
+  top: -6%;
+  border-radius: 60% 0 60% 40%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 190, 210, 0.6));
+  opacity: 0;
+  animation-name: petal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(var(--drift, 40px), 108vh, 0) rotate(520deg);
+    opacity: 0;
+  }
+}
+
+/* 尊重减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

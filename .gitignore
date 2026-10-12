@@ -1,0 +1,32 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+dist-ssr/
+*.local
+
+# 编辑器 / 系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# ------------------------------------------------------------------
+# ⚠️ 第三方版权内容 —— 不要提交到公开仓库
+# novel.txt 是一部网络小说的全文（5.7MB，作者汐尺），未经授权不得再分发。
+# 项目代码当前已不引用它（NovelReader.jsx 是早期遗留，未接入路由）。
+# ------------------------------------------------------------------
+novel.txt
+public/novel-manifest.json
+
+# 已被 React 版取代的旧版单文件页面（保留在本地做参照，不入库）
+app.html
+preview.html

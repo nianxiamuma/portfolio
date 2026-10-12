@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "name": "年下牧马 · 个人收藏站",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.vite": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/package-lock.json": true
+    },
+    "editor.tabSize": 2,
+    "editor.rulers": [100],
+    "tailwindCSS.experimental.classRegex": [
+      ["className\\s*=\\s*[\"'`]([^\"'`]*)[\"'`]", "([a-zA-Z0-9\\-:/\\[\\]\\[%\\].]+)"]
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}
