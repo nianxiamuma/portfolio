@@ -132,6 +132,16 @@
   }
 }
 
+/* 黑胶唱片旋转（播放器用）。只动 transform，走合成层 */
+@keyframes vinyl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes intro-leave-right {
   0% {
     transform: translateX(0);

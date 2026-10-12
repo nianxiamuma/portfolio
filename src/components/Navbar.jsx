@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Music } from 'lucide-react'
 import VisitorNetworkBadge from './VisitorNetworkBadge'
+import MusicPlayer from './MusicPlayer'
+import { musicAvailable } from '../data/music'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/', end: true },
@@ -16,16 +18,20 @@ const NAV_LINKS = [
  * 浮动胶囊导航。
  * - 向下滚动隐藏 / 向上滚动显出
  * - 仅在首页顶部显示「Switch Cover」入口与访客网络徽章
- * - 背景音乐开关（需自备 public/loop.mp3，缺失时静默降级）
+ * - 音乐入口打开唱机面板（MusicPlayer）。曲目清单为空时整个入口不渲染，
+ *   不留一个点了没反应的按钮。旧版写死的 <audio src="/loop.mp3"> 已移除 ——
+ *   那个文件从不存在，且绝对路径在子路径部署下必 404。
  */
+const HAS_MUSIC = musicAvailable()
+
 export default function Navbar() {
   const { pathname } = useLocation()
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [playerOpen, setPlayerOpen] = useState(false)
   const [playing, setPlaying] = useState(false)
   const lastY = useRef(0)
-  const audioRef = useRef(null)
 
   useEffect(() => {
     lastY.current = window.scrollY
@@ -53,16 +59,6 @@ export default function Navbar() {
       document.body.style.overflow = ''
     }
   }, [drawerOpen])
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    if (playing) {
-      audio.play().catch(() => setPlaying(false))
-    } else {
-      audio.pause()
-    }
-  }, [playing])
 
   const openCoverSelector = useCallback(() => {
     window.dispatchEvent(new Event('showHeroPreview'))
@@ -114,21 +110,23 @@ export default function Navbar() {
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setPlaying((v) => !v)}
-              aria-label="切换背景音乐"
-              className="flex shrink-0 items-center gap-1 px-1 py-2"
-            >
-              <Music className={`h-3.5 w-3.5 transition-colors duration-300 ${playing ? 'text-neon-lime' : 'text-slate-500'}`} />
-              {[1, 2, 3, 4].map((bar) => (
-                <span
-                  key={bar}
-                  className={`indicator-line ${playing ? 'active' : ''}`}
-                  style={{ animationDelay: `${bar * 0.1}s` }}
-                />
-              ))}
-            </button>
+            {HAS_MUSIC ? (
+              <button
+                type="button"
+                onClick={() => setPlayerOpen(true)}
+                aria-label="打开唱片机"
+                className="flex shrink-0 items-center gap-1 px-1 py-2"
+              >
+                <Music className={`h-3.5 w-3.5 transition-colors duration-300 ${playing ? 'text-neon-lime' : 'text-slate-500'}`} />
+                {[1, 2, 3, 4].map((bar) => (
+                  <span
+                    key={bar}
+                    className={`indicator-line ${playing ? 'active' : ''}`}
+                    style={{ animationDelay: `${bar * 0.1}s` }}
+                  />
+                ))}
+              </button>
+            ) : null}
 
             <button
               type="button"
@@ -195,7 +193,13 @@ export default function Navbar() {
         </div>
       </div>
 
-      <audio ref={audioRef} src="/loop.mp3" loop preload="none" className="hidden" />
+      {HAS_MUSIC ? (
+        <MusicPlayer
+          open={playerOpen}
+          onClose={() => setPlayerOpen(false)}
+          onPlayingChange={setPlaying}
+        />
+      ) : null}
     </>
   )
 }
