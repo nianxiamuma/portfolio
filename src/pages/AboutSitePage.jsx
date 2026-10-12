@@ -2,9 +2,20 @@ import { useState } from 'react'
 import { ArrowUpRight, Check, Copy, Github, Mail } from 'lucide-react'
 
 import { PROJECTS, SKILLS } from '../data/projects'
+import { SITE } from '../data/site'
 
 const EMAIL = '807273679@qq.com'
-const GITHUB_URL = 'https://github.com/'
+
+/**
+ * GitHub 地址从 SITE.socials 取，不在这里再写一份 ——
+ * 之前这里和名片卡各写了一份，结果名片卡改了、这里还指着裸的 https://github.com/（等于假链接）。
+ * 单一真源 + 一条一致性测试才拦得住这种漂移。
+ */
+const GITHUB_URL =
+  SITE.socials.find((item) => item.key === 'github')?.href || 'https://github.com/nianxiamuma'
+
+/** 展示用：把协议头和末尾斜杠去掉 */
+const GITHUB_LABEL = GITHUB_URL.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
 /**
  * 与站点其它区块一致的排题：编号 + 细线 + 英文标签，下面是中文大标题。
@@ -252,7 +263,7 @@ export default function AboutSitePage() {
                   GitHub
                 </span>
                 <span className="mt-2 block truncate font-mono text-sm text-slate-200">
-                  github.com
+                  {GITHUB_LABEL}
                 </span>
               </span>
               <ArrowUpRight className="relative ml-auto h-4 w-4 text-slate-600 transition-all duration-500 ease-expo-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />

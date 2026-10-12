@@ -2,10 +2,16 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Github, Mail, MessageSquare, Copy, Check, ArrowUp } from 'lucide-react'
 
+import { SITE } from '../data/site'
+
 const EMAIL = '807273679@qq.com'
 
+/** GitHub 地址取 SITE.socials 的单一真源 —— 页脚/名片卡各写一份就会漂移成假链接 */
+const GITHUB_HREF =
+  SITE.socials.find((item) => item.key === 'github')?.href || 'https://github.com/nianxiamuma'
+
 const SOCIAL = [
-  { icon: Github, label: 'GitHub', href: 'https://github.com/' },
+  { icon: Github, label: 'GitHub', href: GITHUB_HREF },
   { icon: MessageSquare, label: '留言板', to: '/guestbook' },
   { icon: Mail, label: '邮件', href: `mailto:${EMAIL}` },
 ]
