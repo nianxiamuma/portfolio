@@ -106,10 +106,24 @@ describe('场景表完整性', () => {
     for (const key of Object.keys(SCENES)) {
       const wallpaper = sceneWallpaper(key)
       expect(wallpaper).toBeTruthy()
-      expect(typeof wallpaper.index).toBe('number')
       expect(wallpaper.scene).toBeTruthy()
+      // 场景壁纸不属于罗盘壁纸表，index 刻意留 null
+      expect(wallpaper.index).toBeNull()
+      expect(wallpaper.scene.image).toContain(`/wallpapers/scene/${SCENES[key].image}`)
     }
     // 未知场景回落，不抛
     expect(sceneWallpaper('不存在')).toBeTruthy()
+  })
+
+  it('每个场景用的图各不相同 —— 用户要求「每页壁纸不同」', () => {
+    const files = Object.values(SCENES).map((scene) => scene.image)
+    expect(new Set(files).size).toBe(files.length)
+  })
+
+  it('压暗强度都在 0~1 之间', () => {
+    for (const scene of Object.values(SCENES)) {
+      expect(scene.dim).toBeGreaterThanOrEqual(0)
+      expect(scene.dim).toBeLessThanOrEqual(1)
+    }
   })
 })

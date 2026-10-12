@@ -32,7 +32,7 @@ export default function Story() {
   }, [])
 
   return (
-    <section id="story" ref={ref} className="relative py-24 lg:py-36">
+    <section id="story" ref={ref} data-bg-scene="home-story" className="relative py-24 lg:py-36">
       <div className="mx-auto max-w-shell px-6 md:px-10 lg:px-16">
         <div className="relative flex justify-center">
           {/* 背光 */}

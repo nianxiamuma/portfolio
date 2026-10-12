@@ -230,7 +230,7 @@ export default function GlimmerPage() {
   const filtering = year !== ALL || category !== ALL
 
   return (
-    <div className="relative overflow-hidden bg-void-950">
+    <div className="relative overflow-hidden">
       {/* 环境光 */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div className="absolute -left-[18%] top-[-12%] h-[52vw] w-[52vw] animate-drift-slow rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.22),transparent_62%)] blur-[110px]" />

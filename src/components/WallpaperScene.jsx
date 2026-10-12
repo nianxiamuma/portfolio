@@ -14,7 +14,7 @@ const pos = (value) => {
 }
 
 export default function WallpaperScene({ wallpaper, className = '' }) {
-  const { scene } = wallpaper
+  const { scene, dim = 0 } = wallpaper
   const [videoAllowed, setVideoAllowed] = useState(false)
 
   useEffect(() => {
@@ -82,6 +82,10 @@ export default function WallpaperScene({ wallpaper, className = '' }) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_78%_68%_at_50%_45%,transparent_38%,rgba(4,5,10,0.72)_100%)]" />
       {/* 视频比静态图更亮，再压一层，避免前景文字被冲淡 */}
       {useVideo ? <div className="absolute inset-0 bg-void-950/15" /> : null}
+      {/* 场景级压暗：内容页文字多，由场景表按页给强度 */}
+      {dim > 0 ? (
+        <div className="absolute inset-0 bg-void-950" style={{ opacity: dim }} />
+      ) : null}
     </div>
   )
 }

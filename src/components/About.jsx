@@ -50,7 +50,12 @@ export default function About() {
   })
 
   return (
-    <section id="about" ref={sectionRef} className="relative w-full overflow-hidden bg-void-950">
+    <section
+      id="about"
+      ref={sectionRef}
+      data-bg-scene="home-about"
+      className="relative w-full overflow-hidden bg-void-950"
+    >
       <div className="flex h-screen w-full items-center justify-center">
         <div
           ref={cardRef}

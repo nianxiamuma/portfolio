@@ -33,7 +33,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/[0.06] bg-void-950">
+    <footer className="relative overflow-hidden border-t border-white/[0.06] bg-void-950/70 backdrop-blur-sm">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute -top-1/3 left-1/2 h-[46vw] w-[70vw] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,92,255,0.16),transparent_65%)] blur-3xl" />
         <div className="absolute inset-0 bg-grid-faint [background-size:72px_72px] opacity-40 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black,transparent)]" />

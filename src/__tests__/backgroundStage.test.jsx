@@ -20,19 +20,19 @@ const renderStage = (path, extra = null) =>
   )
 
 /**
- * 抠出「前层」（opacity 为 1 的那一槽）正在显示哪张 wpN。
+ * 读取「前层」（opacity 为 1 的那一槽）当前显示的图。
  * 后层会刻意留着上一张壁纸，方便下次交叉淡入 —— 所以只能看前层。
  */
-const frontWallpaperIndex = (container) => {
+const frontImage = (container) => {
   const front = container.querySelector('[data-bg-layer][data-front="true"]')
-  if (!front) return null
-  const img = front.querySelector('img')
-  return (img?.getAttribute('src') || '').match(/wp(\d)\.jpg/)?.[1] ?? null
+  return front?.querySelector('img')?.getAttribute('src') ?? null
 }
 
-const expectFrontLayer = (container, wallpaperIndex) => {
-  expect(frontWallpaperIndex(container)).toBe(String(wallpaperIndex))
+const expectFrontLayer = (container, sceneKey) => {
+  expect(frontImage(container)).toContain(`/wallpapers/scene/${SCENES[sceneKey].image}`)
 }
+
+const sceneImageOf = (sceneKey) => SCENES[sceneKey].image
 
 describe('背景层 BackgroundStage', () => {
   it('钉在视口下方铺底：fixed / 负 z / 不拦指针 / 对读屏隐藏', () => {
@@ -52,25 +52,25 @@ describe('背景层 BackgroundStage', () => {
 
   it('首页用 home-hero 那一张', () => {
     const { container } = renderStage('/')
-    expectFrontLayer(container, SCENES['home-hero'].wallpaper)
+    expectFrontLayer(container, 'home-hero')
   })
 
-  it('换页换成该页场景的壁纸', () => {
+  it('换页换成该页场景的图', () => {
     const { container } = renderStage('/about')
-    expectFrontLayer(container, SCENES.about.wallpaper)
+    expectFrontLayer(container, 'about')
     // 前提校验：这一条只有在两页确实不同时才有意义
-    expect(SCENES.about.wallpaper).not.toBe(SCENES['home-hero'].wallpaper)
+    expect(sceneImageOf('about')).not.toBe(sceneImageOf('home-hero'))
   })
 
-  it('文章详情页沿用文章列表的壁纸', () => {
+  it('文章详情页沿用文章列表的图', () => {
     const { container } = renderStage('/blog/some-slug')
-    expectFrontLayer(container, SCENES.blog.wallpaper)
+    expectFrontLayer(container, 'blog')
   })
 
   it('区块标了 data-bg-scene 时，区块场景接管路由默认', () => {
     const { container } = renderStage('/', <div {...{ [SCENE_ATTR]: 'home-about' }} />)
-    expectFrontLayer(container, SCENES['home-about'].wallpaper)
-    expect(SCENES['home-about'].wallpaper).not.toBe(SCENES['home-hero'].wallpaper)
+    expectFrontLayer(container, 'home-about')
+    expect(sceneImageOf('home-about')).not.toBe(sceneImageOf('home-hero'))
   })
 })
 
