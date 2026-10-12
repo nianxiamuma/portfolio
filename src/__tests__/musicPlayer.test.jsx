@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, within, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
 import MusicPlayer from '../components/MusicPlayer'
@@ -95,5 +95,81 @@ describe('曲目清单为空时的降级', () => {
     expect(screen.queryByLabelText('打开唱片机')).toBeNull()
     vi.doUnmock('../data/music')
     vi.resetModules()
+  })
+})
+
+/**
+ * 只判「清单非空」是不够的：.gitignore 把 public/music/* 挡在仓库外，
+ * 公开站点上清单非空但文件不存在 —— 那样会留下一个点了没反应的死按钮。
+ * 这两条钉住运行期探测。
+ */
+describe('音乐入口的运行期探测', () => {
+  const mockMusic = (overrides = {}) => {
+    vi.resetModules()
+    vi.doMock('../data/music', () => ({
+      MUSIC_TRACKS: [{ id: 't', title: 'T', artist: 'A', file: 't.mp3' }],
+      musicAvailable: () => true,
+      trackSrc: () => '/music/t.mp3',
+      ...overrides,
+    }))
+  }
+
+  afterEach(() => {
+    vi.doUnmock('../data/music')
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  it('音频可取到 → 入口出现', async () => {
+    mockMusic()
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: true })))
+    const { default: Navbar } = await import('../components/Navbar')
+    render(
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByLabelText('打开唱片机')).toBeTruthy()
+  })
+
+  it('音频取不到（线上未部署）→ 入口不出现', async () => {
+    mockMusic()
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false })))
+    const { default: Navbar } = await import('../components/Navbar')
+    render(
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(screen.queryByLabelText('打开唱片机')).toBeNull())
+  })
+
+  it('资源被回退成 HTML（SPA 站点上缺失文件返回 200）→ 同样不出现', async () => {
+    mockMusic()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({ ok: true, headers: { get: () => 'text/html; charset=utf-8' } }),
+      ),
+    )
+    const { default: Navbar } = await import('../components/Navbar')
+    render(
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(screen.queryByLabelText('打开唱片机')).toBeNull())
+  })
+
+  it('探测请求本身失败（网络/跨域）→ 同样不出现，不抛', async () => {
+    mockMusic()
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('boom'))))
+    const { default: Navbar } = await import('../components/Navbar')
+    render(
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>,
+    )
+    await waitFor(() => expect(screen.queryByLabelText('打开唱片机')).toBeNull())
   })
 })

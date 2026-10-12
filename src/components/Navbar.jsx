@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Music } from 'lucide-react'
 import VisitorNetworkBadge from './VisitorNetworkBadge'
 import MusicPlayer from './MusicPlayer'
-import { musicAvailable } from '../data/music'
+import { MUSIC_TRACKS, musicAvailable, trackSrc } from '../data/music'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/', end: true },
@@ -18,9 +18,13 @@ const NAV_LINKS = [
  * 浮动胶囊导航。
  * - 向下滚动隐藏 / 向上滚动显出
  * - 仅在首页顶部显示「Switch Cover」入口与访客网络徽章
- * - 音乐入口打开唱机面板（MusicPlayer）。曲目清单为空时整个入口不渲染，
- *   不留一个点了没反应的按钮。旧版写死的 <audio src="/loop.mp3"> 已移除 ——
+ * - 音乐入口打开唱机面板（MusicPlayer）。旧版写死的 <audio src="/loop.mp3"> 已移除 ——
  *   那个文件从不存在，且绝对路径在子路径部署下必 404。
+ *
+ * 音乐入口的显隐分两层判断，缺一不可：
+ *   1. 编译期：清单是否为空（清单在仓库里，编译期就能判）
+ *   2. 运行期：音频文件是否真的可取到（.gitignore 把 public/music/* 挡在仓库外，
+ *      所以公开站点上清单非空但文件 404 —— 只判第 1 层就会留下一个点了没反应的死按钮）
  */
 const HAS_MUSIC = musicAvailable()
 
@@ -31,7 +35,37 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [playerOpen, setPlayerOpen] = useState(false)
   const [playing, setPlaying] = useState(false)
+  // 初值为 false：宁可晚 100ms 出现，也不要先冒出来再消失
+  const [musicReady, setMusicReady] = useState(false)
   const lastY = useRef(0)
+
+  /* 运行期探测：第一首取不到就把整条音乐线收起来 */
+  useEffect(() => {
+    if (!HAS_MUSIC) return undefined
+    const first = MUSIC_TRACKS[0]
+    if (!first) return undefined
+    let alive = true
+    const probe = typeof fetch === 'function' ? fetch : null
+    if (!probe) {
+      // 没有 fetch 的环境（老浏览器/测试替身）不阻断功能，直接当作可用
+      setMusicReady(true)
+      return undefined
+    }
+    probe(trackSrc(first), { method: 'HEAD' })
+      .then((res) => {
+        if (!alive) return
+        // 不能只看 res.ok：缺失的资源在 SPA 站点上会被回退成 index.html 并返回 200。
+        // 判据是「返回的不是 HTML 页面」。真实 mp3 是 audio/mpeg，不会命中这条。
+        const type = res?.headers?.get?.('content-type') || ''
+        setMusicReady(Boolean(res && res.ok) && !/text\/html/i.test(type))
+      })
+      .catch(() => {
+        if (alive) setMusicReady(false)
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     lastY.current = window.scrollY
@@ -110,7 +144,7 @@ export default function Navbar() {
               ))}
             </div>
 
-            {HAS_MUSIC ? (
+            {HAS_MUSIC && musicReady ? (
               <button
                 type="button"
                 onClick={() => setPlayerOpen(true)}
@@ -193,7 +227,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {HAS_MUSIC ? (
+      {HAS_MUSIC && musicReady ? (
         <MusicPlayer
           open={playerOpen}
           onClose={() => setPlayerOpen(false)}
