@@ -1,8 +1,8 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { render, cleanup } from '@testing-library/react'
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { render, cleanup, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
-import BackgroundStage from '../components/BackgroundStage'
+import BackgroundStage, { ROTATE_MS } from '../components/BackgroundStage'
 import { BackgroundProvider, SCENE_ATTR } from '../context/BackgroundContext'
 import { SCENES } from '../lib/backgrounds'
 import { WALLPAPERS } from '../lib/wallpapers'
@@ -28,11 +28,11 @@ const frontImage = (container) => {
   return front?.querySelector('img')?.getAttribute('src') ?? null
 }
 
-const expectFrontLayer = (container, sceneKey) => {
-  expect(frontImage(container)).toContain(`/wallpapers/scene/${SCENES[sceneKey].image}`)
+const expectFrontLayer = (container, sceneKey, variant = 0) => {
+  expect(frontImage(container)).toContain(`/wallpapers/scene/${SCENES[sceneKey].images[variant]}`)
 }
 
-const sceneImageOf = (sceneKey) => SCENES[sceneKey].image
+const sceneImageOf = (sceneKey, variant = 0) => SCENES[sceneKey].images[variant]
 
 describe('背景层 BackgroundStage', () => {
   it('钉在视口下方铺底：fixed / 负 z / 不拦指针 / 对读屏隐藏', () => {
@@ -71,6 +71,49 @@ describe('背景层 BackgroundStage', () => {
     const { container } = renderStage('/', <div {...{ [SCENE_ATTR]: 'home-about' }} />)
     expectFrontLayer(container, 'home-about')
     expect(sceneImageOf('home-about')).not.toBe(sceneImageOf('home-hero'))
+  })
+})
+
+describe('同场景轮换（每页多张图）', () => {
+  it('同一页停留够久会换到下一张', () => {
+    vi.useFakeTimers()
+    try {
+      const { container } = renderStage('/about')
+      expect(frontImage(container)).toContain(sceneImageOf('about', 0))
+
+      act(() => {
+        vi.advanceTimersByTime(ROTATE_MS + 200)
+      })
+      expect(frontImage(container)).toContain(sceneImageOf('about', 1))
+
+      // 再走一轮应绕回第一张（about 只有 2 张）
+      act(() => {
+        vi.advanceTimersByTime(ROTATE_MS + 200)
+      })
+      expect(frontImage(container)).toContain(sceneImageOf('about', 0))
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('轮换不会跨到别的场景的图', () => {
+    vi.useFakeTimers()
+    try {
+      const { container } = renderStage('/blog')
+      const otherImages = Object.entries(SCENES)
+        .filter(([key]) => key !== 'blog')
+        .flatMap(([, scene]) => scene.images)
+      act(() => {
+        vi.advanceTimersByTime(ROTATE_MS * 3 + 200)
+      })
+      const current = frontImage(container)
+      expect(current).toContain('/wallpapers/scene/')
+      for (const img of otherImages) {
+        expect(current).not.toContain(img)
+      }
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 

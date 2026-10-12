@@ -5,10 +5,11 @@
  * 换背景只改这张表；新增页面只加一行路由映射。
  *
  * 与 wallpapers.js 的分工：
- *   wallpapers.js —— Hero 罗盘可选的 4 张「封面壁纸」（带配色 / 诗句 / 四方位）
- *   backgrounds.js —— 各页面/区块铺底用的「场景壁纸」（每个场景一张，互不相同）
+ *   wallpapers.js —— Hero 罗盘可选的「封面壁纸」（带配色 / 诗句 / 方位）
+ *   backgrounds.js —— 各页面/区块铺底用的「场景壁纸」
  *
  * 场景图来自本机 Wallpaper Engine 素材 imgs\，已复制到 public\wallpapers\scene\。
+ * 每个场景给 2 张，由 BackgroundStage 定时轮换 —— 满足「每页多几张轮换」。
  * 挑图标准：内容页优先暗调、低细节，免得压住正文；首页首屏可以用人物/星空。
  */
 const BASE = import.meta.env.BASE_URL
@@ -18,22 +19,42 @@ export const DEFAULT_SCENE = 'home-hero'
 
 /**
  * 场景 → 背景定义。
- *   image：public/wallpapers/scene/ 下的文件名
- *   name：这张图的内部代号（只用于排查，不展示）
+ *   images：public/wallpapers/scene/ 下的文件名，可多张（轮换顺序即数组顺序）
+ *   name：这组图的内部代号（只用于排查，不展示）
  *   dim：可选，额外压暗强度 0~1。内容页文字多，压暗一点可读性更好。
  */
 export const SCENES = {
-  'home-hero': { image: 'scene-hero.jpg', name: '星野', dim: 0.15 },
-  'home-about': { image: 'scene-home-about.jpg', name: '长河', dim: 0.35 },
-  'home-features': { image: 'scene-home-features.jpg', name: '晴空', dim: 0.4 },
-  'home-story': { image: 'scene-home-story.jpg', name: '落花', dim: 0.45 },
-  'home-slot': { image: 'scene-home-slot.jpg', name: '暗翼', dim: 0.35 },
-  about: { image: 'scene-about.jpg', name: '旧城', dim: 0.5 },
-  glimmer: { image: 'scene-glimmer.jpg', name: '春信', dim: 0.4 },
-  collection: { image: 'scene-collection.jpg', name: '古街', dim: 0.4 },
-  friends: { image: 'scene-friends.jpg', name: '礁岸', dim: 0.45 },
-  guestbook: { image: 'scene-guestbook.jpg', name: '夜归', dim: 0.45 },
-  blog: { image: 'scene-blog.jpg', name: '雪线', dim: 0.5 },
+  'home-hero': { name: '星野', dim: 0.15, images: ['scene-hero.jpg', 'scene-hero-2.jpg'] },
+  'home-about': {
+    name: '长河',
+    dim: 0.35,
+    images: ['scene-home-about.jpg', 'scene-home-about-2.jpg'],
+  },
+  'home-features': {
+    name: '晴空',
+    dim: 0.4,
+    images: ['scene-home-features.jpg', 'scene-home-features-2.jpg'],
+  },
+  'home-story': {
+    name: '落花',
+    dim: 0.45,
+    images: ['scene-home-story.jpg', 'scene-home-story-2.jpg'],
+  },
+  'home-slot': { name: '暗翼', dim: 0.35, images: ['scene-home-slot.jpg', 'scene-home-slot-2.jpg'] },
+  about: { name: '旧城', dim: 0.5, images: ['scene-about.jpg', 'scene-about-2.jpg'] },
+  glimmer: { name: '春信', dim: 0.4, images: ['scene-glimmer.jpg', 'scene-glimmer-2.jpg'] },
+  collection: {
+    name: '古街',
+    dim: 0.4,
+    images: ['scene-collection.jpg', 'scene-collection-2.jpg'],
+  },
+  friends: { name: '礁岸', dim: 0.45, images: ['scene-friends.jpg', 'scene-friends-2.jpg'] },
+  guestbook: {
+    name: '夜归',
+    dim: 0.45,
+    images: ['scene-guestbook.jpg', 'scene-guestbook-2.jpg'],
+  },
+  blog: { name: '雪线', dim: 0.5, images: ['scene-blog.jpg', 'scene-blog-2.jpg'] },
 }
 
 /** 顶部路由 → 场景 */
@@ -68,18 +89,35 @@ export function resolveScene(pathname) {
   return hit ? ROUTE_SCENES[hit] : DEFAULT_SCENE
 }
 
+/** 场景有几张可轮换的图（至少 1，配错时空数组也不会把轮换逻辑除以零） */
+export function sceneImageCount(key) {
+  const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
+  return Array.isArray(scene.images) && scene.images.length ? scene.images.length : 0
+}
+
+/** 把任意整数收敛到 [0, count) —— 轮换到第 100 张也不会越界 */
+export function wrapVariant(variant, count) {
+  if (!count) return 0
+  const n = Number.isFinite(variant) ? Math.trunc(variant) : 0
+  return ((n % count) + count) % count
+}
+
 /**
  * 场景 → 壁纸对象（形状与 wallpapers.js 的条目兼容，好让 WallpaperScene 直接吃）。
+ * variant 用来在同场景的多张图之间轮换；越界会自动绕回。
  * 未知场景回落默认场景。
  * 注意 index 为 null —— 场景壁纸不在罗盘壁纸表里，没有罗盘序号。
  */
-export function sceneWallpaper(key) {
+export function sceneWallpaper(key, variant = 0) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
+  const images = Array.isArray(scene.images) ? scene.images : []
+  if (!images.length) return null
+
   return {
     index: null,
     name: scene.name,
     dim: typeof scene.dim === 'number' ? scene.dim : 0,
-    scene: { image: `${BASE}wallpapers/scene/${scene.image}` },
+    scene: { image: `${BASE}wallpapers/scene/${images[wrapVariant(variant, images.length)]}` },
   }
 }
 

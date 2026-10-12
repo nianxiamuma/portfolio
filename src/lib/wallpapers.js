@@ -114,16 +114,99 @@ export const WALLPAPERS = [
   },
 ]
 
+/**
+ * 追加的 4 张封面 —— 用户反馈「选择器里可选壁纸太少」，从 4 张扩到 8 张。
+ * 只有 scene.image（图直接铺满），不带生成式渐变；WallpaperScene 在有图时不会走渐变分支。
+ * 配色沿用上面四套主题，诗句换成另外四位，避免《锦瑟》八句被用两遍。
+ */
+export const EXTRA_COVERS = [
+  {
+    index: 5,
+    direction: 'NE',
+    label: 'North-East',
+    name: '晨雾',
+    angle: 45,
+    poem: ['行到水穷处', '坐看云起时'],
+    theme: {
+      accent: '#d9fff3',
+      line: 'rgba(217, 255, 243, 0.5)',
+      soft: 'rgba(144, 232, 214, 0.2)',
+      glow: 'rgba(184, 255, 239, 0.3)',
+      overlay: 'rgba(8, 18, 20, 0.6)',
+    },
+    scene: { image: `${BASE}wallpapers/scene/scene-home-about-2.jpg` },
+  },
+  {
+    index: 6,
+    direction: 'SE',
+    label: 'South-East',
+    name: '花信',
+    angle: 135,
+    poem: ['人生如逆旅', '我亦是行人'],
+    theme: {
+      accent: '#f7d8ff',
+      line: 'rgba(247, 216, 255, 0.5)',
+      soft: 'rgba(214, 165, 255, 0.2)',
+      glow: 'rgba(235, 202, 255, 0.3)',
+      overlay: 'rgba(14, 9, 22, 0.6)',
+    },
+    scene: { image: `${BASE}wallpapers/scene/scene-glimmer-2.jpg` },
+  },
+  {
+    index: 7,
+    direction: 'SW',
+    label: 'South-West',
+    name: '远帆',
+    angle: 225,
+    poem: ['山随平野尽', '江入大荒流'],
+    theme: {
+      accent: '#ffe7b8',
+      line: 'rgba(255, 231, 184, 0.5)',
+      soft: 'rgba(255, 202, 128, 0.2)',
+      glow: 'rgba(255, 221, 170, 0.3)',
+      overlay: 'rgba(16, 13, 18, 0.6)',
+    },
+    scene: { image: `${BASE}wallpapers/scene/scene-friends.jpg` },
+  },
+  {
+    index: 8,
+    direction: 'NW',
+    label: 'North-West',
+    name: '孤星',
+    angle: 315,
+    poem: ['星垂平野阔', '月涌大江流'],
+    theme: {
+      accent: '#f2f6ff',
+      line: 'rgba(242, 246, 255, 0.5)',
+      soft: 'rgba(180, 205, 255, 0.2)',
+      glow: 'rgba(210, 225, 255, 0.3)',
+      overlay: 'rgba(6, 10, 20, 0.6)',
+    },
+    scene: { image: `${BASE}wallpapers/scene/scene-blog-2.jpg` },
+  },
+]
+
+/** 罗盘上所有可选封面 = 原来 4 张 + 追加 4 张 */
+export const ALL_COVERS = [...WALLPAPERS, ...EXTRA_COVERS]
+
 export const getWallpaper = (index) =>
-  WALLPAPERS.find((item) => item.index === index) || WALLPAPERS[0]
+  ALL_COVERS.find((item) => item.index === index) || ALL_COVERS[0]
 
 /** 罗盘 32 刻度 */
 export const COMPASS_TICKS = 32
 
-/** 罗盘卡片在四个方位的定位（对应上 / 右 / 下 / 左） */
+/**
+ * 罗盘卡片的屏幕方位，按 **cover.index** 索引 —— 必须与该 cover 的 angle 一一对应，
+ * 否则指针指的方向和卡片所在的位置会错位。
+ * 角度 → 方位：0=N上 / 45=NE右上 / 90=E右 / 135=SE右下 / 180=S下 / 225=SW左下 / 270=W左 / 315=NW左上
+ */
 export const COMPASS_CARD_POSITIONS = {
-  1: 'left-1/2 top-[-2%] -translate-x-1/2',
-  2: 'left-[78%] top-1/2 -translate-x-1/2 -translate-y-1/2',
-  3: 'left-1/2 top-[102%] -translate-x-1/2 -translate-y-full',
-  4: 'left-[22%] top-1/2 -translate-x-1/2 -translate-y-1/2',
+  1: 'left-1/2 top-[-2%] -translate-x-1/2', // 0° N
+  2: 'left-[80%] top-1/2 -translate-x-1/2 -translate-y-1/2', // 90° E
+  3: 'left-1/2 top-[96%] -translate-x-1/2 -translate-y-full', // 180° S
+  4: 'left-[20%] top-1/2 -translate-x-1/2 -translate-y-1/2', // 270° W
+  5: 'left-[74%] top-[9%] -translate-x-1/2', // 45° NE
+  6: 'left-[74%] top-[71%] -translate-x-1/2', // 135° SE
+  7: 'left-[26%] top-[71%] -translate-x-1/2', // 225° SW
+  8: 'left-[26%] top-[9%] -translate-x-1/2', // 315° NW
 }

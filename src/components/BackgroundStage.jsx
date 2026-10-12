@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react'
 
 import WallpaperScene from './WallpaperScene'
-import { sceneWallpaper } from '../lib/backgrounds'
+import { DEFAULT_SCENE, sceneImageCount, sceneWallpaper } from '../lib/backgrounds'
 import { useBackgroundScene } from '../context/BackgroundContext'
 
 /**
  * 站点级背景层：钉在视口上（fixed），铺在所有页面内容下面。
  *
- * 切换只动 opacity —— 两个槽位轮流当"前层"，换背景时把新壁纸放进隐藏的那一槽再翻面。
- * 刻意不用 filter / 尺寸变化：那些属性会触发重绘，滚动时逐帧变就是掉帧源。
- * （2026-10-13 实测：Hero 的 filter:brightness scrub 并不是卡顿源，但同类的重绘属性
- *  仍应避免 —— 见 .rivet/scratch/fps-probe.mjs 的 A/C/F 三组测量。）
+ * 两个职责：
+ *   1. 场景切换 —— 换页或滚到下一个区块时交叉淡入到新场景
+ *   2. 同场景轮换 —— 每个场景有多张图，每隔 rotateMs 换下一张
+ *
+ * 两者共用同一套「双槽位」：一个槽当前显示，另一个槽预载下一张，靠翻面交叉淡入。
+ * 切换只动 opacity —— 不用 filter / 尺寸变化，那些属性会触发重绘。
+ * （2026-10-13 实测：Hero 的 filter:brightness scrub 并不是卡顿源，但同类的重绘属性仍应避免。）
  */
-export default function BackgroundStage() {
+export const ROTATE_MS = 45000
+
+const slotFor = (key, variant) => ({ key, variant })
+
+export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
   const { scene } = useBackgroundScene()
 
-  // slots.frontIsA 表示当前"前层"是 A 槽；另一个槽预载下一张，翻面即交叉淡入
-  const [slots, setSlots] = useState({ a: scene, b: scene, frontIsA: true })
+  const [slots, setSlots] = useState(() => ({
+    a: slotFor(scene, 0),
+    b: slotFor(scene, 0),
+    frontIsA: true,
+  }))
   const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
@@ -28,37 +38,56 @@ export default function BackgroundStage() {
     return () => mq.removeEventListener?.('change', update)
   }, [])
 
+  /* 场景变了：把新场景的第 0 张放进看不见的那一槽，再翻面 */
   useEffect(() => {
     setSlots((prev) => {
-      const current = prev.frontIsA ? prev.a : prev.b
-      if (current === scene) return prev
-      // 把新场景放进"看不见"的那一槽，再翻面
+      const front = prev.frontIsA ? prev.a : prev.b
+      if (front.key === scene) return prev
+      const next = slotFor(scene, 0)
       return prev.frontIsA
-        ? { a: prev.a, b: scene, frontIsA: false }
-        : { a: scene, b: prev.b, frontIsA: true }
+        ? { a: prev.a, b: next, frontIsA: false }
+        : { a: next, b: prev.b, frontIsA: true }
     })
   }, [scene])
 
+  /* 定时轮换：把同场景的下一张放进隐藏槽再翻面 */
+  useEffect(() => {
+    if (reduceMotion) return undefined
+    const id = window.setInterval(() => {
+      setSlots((prev) => {
+        const front = prev.frontIsA ? prev.a : prev.b
+        if (sceneImageCount(front.key) <= 1) return prev
+        const next = slotFor(front.key, front.variant + 1)
+        return prev.frontIsA
+          ? { a: prev.a, b: next, frontIsA: false }
+          : { a: next, b: prev.b, frontIsA: true }
+      })
+    }, rotateMs)
+    return () => window.clearInterval(id)
+  }, [reduceMotion, rotateMs])
+
   const fade = reduceMotion ? '' : 'transition-opacity duration-700 ease-expo-out'
+
+  const layer = (slot, isFront) => (
+    <div
+      data-bg-layer={isFront ? 'front-slot' : 'back-slot'}
+      data-front={isFront ? 'true' : 'false'}
+      data-scene={slot.key}
+      data-variant={slot.variant}
+      className={`absolute inset-0 ${fade}`}
+      style={{ opacity: isFront ? 1 : 0 }}
+    >
+      <WallpaperScene
+        wallpaper={sceneWallpaper(slot.key, slot.variant) || sceneWallpaper(DEFAULT_SCENE, 0)}
+      />
+    </div>
+  )
 
   return (
     <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-      <div
-        data-bg-layer="a"
-        data-front={slots.frontIsA ? 'true' : 'false'}
-        className={`absolute inset-0 ${fade}`}
-        style={{ opacity: slots.frontIsA ? 1 : 0 }}
-      >
-        <WallpaperScene wallpaper={sceneWallpaper(slots.a)} />
-      </div>
-      <div
-        data-bg-layer="b"
-        data-front={slots.frontIsA ? 'false' : 'true'}
-        className={`absolute inset-0 ${fade}`}
-        style={{ opacity: slots.frontIsA ? 0 : 1 }}
-      >
-        <WallpaperScene wallpaper={sceneWallpaper(slots.b)} />
-      </div>
+      {slots.frontIsA
+        ? [layer(slots.a, true), layer(slots.b, false)]
+        : [layer(slots.a, false), layer(slots.b, true)]}
     </div>
   )
 }

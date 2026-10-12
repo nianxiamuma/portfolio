@@ -6,7 +6,9 @@ import {
   SCENES,
   pickActiveScene,
   resolveScene,
+  sceneImageCount,
   sceneWallpaper,
+  wrapVariant,
 } from '../lib/backgrounds'
 
 /**
@@ -109,15 +111,44 @@ describe('场景表完整性', () => {
       expect(wallpaper.scene).toBeTruthy()
       // 场景壁纸不属于罗盘壁纸表，index 刻意留 null
       expect(wallpaper.index).toBeNull()
-      expect(wallpaper.scene.image).toContain(`/wallpapers/scene/${SCENES[key].image}`)
+      expect(wallpaper.scene.image).toContain(`/wallpapers/scene/${SCENES[key].images[0]}`)
     }
     // 未知场景回落，不抛
     expect(sceneWallpaper('不存在')).toBeTruthy()
   })
 
-  it('每个场景用的图各不相同 —— 用户要求「每页壁纸不同」', () => {
-    const files = Object.values(SCENES).map((scene) => scene.image)
+  it('variant 越界时绕回，不越界也不抛', () => {
+    const first = sceneWallpaper('about', 0)
+    const second = sceneWallpaper('about', 1)
+    expect(first.scene.image).not.toBe(second.scene.image)
+    // 绕回第一张
+    expect(sceneWallpaper('about', 2).scene.image).toBe(first.scene.image)
+    // 负数与非法值都收敛
+    expect(sceneWallpaper('about', -1).scene.image).toBe(second.scene.image)
+    expect(sceneWallpaper('about', NaN).scene.image).toBe(first.scene.image)
+  })
+
+  it('所有场景图合起来不重复 —— 用户要求「每页壁纸不同」', () => {
+    const files = Object.values(SCENES).flatMap((scene) => scene.images)
+    expect(files.length).toBeGreaterThan(0)
     expect(new Set(files).size).toBe(files.length)
+  })
+
+  it('每个场景都有图，且张数可查（轮换逻辑不能除以零）', () => {
+    for (const [key, scene] of Object.entries(SCENES)) {
+      expect(scene.images.length, key).toBeGreaterThan(0)
+      expect(sceneImageCount(key)).toBe(scene.images.length)
+    }
+  })
+
+  it('wrapVariant 把任意整数收敛到合法区间', () => {
+    expect(wrapVariant(0, 2)).toBe(0)
+    expect(wrapVariant(1, 2)).toBe(1)
+    expect(wrapVariant(2, 2)).toBe(0)
+    expect(wrapVariant(-1, 2)).toBe(1)
+    expect(wrapVariant(99, 2)).toBe(1)
+    expect(wrapVariant(NaN, 2)).toBe(0)
+    expect(wrapVariant(3, 0)).toBe(0)
   })
 
   it('压暗强度都在 0~1 之间', () => {

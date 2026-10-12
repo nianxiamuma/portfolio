@@ -42,6 +42,23 @@ describe('唱机播放器', () => {
     expect(screen.queryByTestId('music-panel')).toBeNull()
   })
 
+  it('面板关闭时音频元素仍在 —— 关掉面板不该中断播放', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <MusicPlayer open={false} onClose={() => {}} />
+      </MemoryRouter>,
+    )
+    // 这条钉住用户报的问题：早先 audio 写在面板里，一关面板组件卸载、歌就断了
+    const audio = container.querySelector('audio')
+    expect(audio).toBeTruthy()
+    expect(audio.getAttribute('src')).toBe(trackSrc(MUSIC_TRACKS[0]))
+  })
+
+  it('面板里有进度条', () => {
+    renderPlayer()
+    expect(screen.getByLabelText('播放进度')).toBeTruthy()
+  })
+
   it('在唱片架点另一首会换片并开始播放', () => {
     const seen = []
     const { container } = renderPlayer({ onPlayingChange: (v) => seen.push(v) })

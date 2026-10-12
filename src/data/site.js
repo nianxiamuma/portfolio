@@ -23,6 +23,7 @@ export const SITE = {
   socials: [
     { key: 'mail', label: '邮件', href: 'mailto:807273679@qq.com' },
     { key: 'guestbook', label: '留言板', to: '/guestbook' },
-    { key: 'github', label: 'GitHub', href: 'https://github.com/' },
+    // 原来指向公共首页 https://github.com/ —— 点进去等于没去，等于装饰。指到本仓库。
+    { key: 'github', label: 'GitHub', href: 'https://github.com/nianxiamuma/portfolio' },
   ],
 }

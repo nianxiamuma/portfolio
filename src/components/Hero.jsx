@@ -9,9 +9,9 @@ import HeroWordmark from './HeroWordmark'
 import HeroProfileCard from './HeroProfileCard'
 import Petals from './Petals'
 import {
+  ALL_COVERS,
   COMPASS_CARD_POSITIONS,
   COMPASS_TICKS,
-  WALLPAPERS,
   getWallpaper,
 } from '../lib/wallpapers'
 import {
@@ -23,7 +23,7 @@ import {
 
 gsap.registerPlugin(ScrollTrigger)
 
-const COMPASS_ITEMS = WALLPAPERS.map(({ index, angle, label }) => ({ index, angle, label }))
+const COMPASS_ITEMS = ALL_COVERS.map(({ index, angle, label }) => ({ index, angle, label }))
 
 export default function Hero() {
   const [current, setCurrent] = useState(1)
@@ -48,7 +48,7 @@ export default function Hero() {
   /* 导航栏的 SWITCH COVER 按钮通过全局事件唤起选择器 */
   useEffect(() => {
     const open = () => {
-      const active = WALLPAPERS.find((w) => w.index === current)
+      const active = ALL_COVERS.find((w) => w.index === current)
       setRotation(active ? active.angle : 0)
       setSelectorOpen(true)
     }
@@ -185,8 +185,11 @@ export default function Hero() {
           className="right-6 top-24 md:right-14 md:top-32"
         />
 
-        {/* 个人名片卡（融合自参考站 rainzt.cn） */}
-        <div className="absolute right-6 top-1/2 z-40 hidden -translate-y-1/2 lg:block xl:right-14">
+        {/* 个人名片卡（融合自参考站 rainzt.cn）
+            z-50 而不是 z-40：下面那层主文案是 absolute inset-0 z-40，铺满全屏且在 DOM 里更靠后，
+            同 z 值时它盖在名片卡上面，把卡里所有按钮的点击全吞掉（命中测试实测 reachable=false）。
+            名片卡本来就是要浮在主文案之上的，所以给它更高的 z。 */}
+        <div className="absolute right-6 top-1/2 z-50 hidden -translate-y-1/2 lg:block xl:right-14">
           <HeroProfileCard />
         </div>
 
@@ -337,7 +340,7 @@ export default function Hero() {
             </div>
 
             {/* 四张封面卡 */}
-            {WALLPAPERS.map((wp) => {
+            {ALL_COVERS.map((wp) => {
               const isPointed = wp.index === pointedIndex
               return (
                 <button
@@ -349,7 +352,7 @@ export default function Hero() {
                   }}
                   className={`pointer-events-auto absolute z-20 overflow-hidden rounded-lg border text-left transition-all duration-500 ease-expo-out ${COMPASS_CARD_POSITIONS[wp.index]}`}
                   style={{
-                    width: 'clamp(190px, 17vw, 300px)',
+                    width: 'clamp(150px, 13.5vw, 234px)',
                     aspectRatio: '16 / 9',
                     borderColor: isPointed ? theme.accent : 'rgba(255,255,255,0.14)',
                     boxShadow: isPointed

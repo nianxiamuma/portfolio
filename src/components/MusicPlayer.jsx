@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Disc3, Pause, Play, Repeat, Repeat1, SkipBack, SkipForward, X } from 'lucide-react'
+import { Disc3, Pause, Play, Repeat, Repeat1, SkipBack, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
 
 import VinylRecord from './VinylRecord'
 import { MUSIC_TRACKS, trackSrc } from '../data/music'
@@ -7,27 +7,39 @@ import { MUSIC_TRACKS, trackSrc } from '../data/music'
 /**
  * 老式唱机风格的背景音乐播放器。
  *
- * 交互：
- *   - 点 Navbar 的音符按钮打开/收起
- *   - 唱片在转盘上转（播放时），唱臂落针/抬起
- *   - 唱片架里点一首切歌；在唱片上左右拖动也能换片（滑动换唱片）
- *   - 上一首 / 播放暂停 / 下一首 / 单曲循环
+ * 关键设计：**<audio> 挂在面板外面**，面板只是它的一个视图。
+ * 早先的写法把 audio 放在面板里，一关面板整个组件卸载、歌就断了 ——
+ * 用户明确要求「开启后退出来也要能继续播」。
  *
- * 关于自动播放：浏览器策略要求先有用户手势才允许出声，所以这里不做「开站自动播」，
- * 必须用户点一次播放 —— 这不是 bug，是平台限制。
+ * 交互：
+ *   - 点 Navbar 音符按钮开合面板；关掉面板继续放
+ *   - 唱片在转盘上转（播放时），唱臂落针/抬起
+ *   - 进度条可拖动跳转
+ *   - 唱片架点选切歌；在唱片上左右拖动也能换片
+ *   - 上一首 / 播放暂停 / 下一首 / 单曲循环 / 音量
+ *
+ * 关于自动播放：浏览器策略要求先有用户手势才允许出声，所以不做「开站自动播」。
  */
 const SWIPE_THRESHOLD = 48
+
+const formatTime = (seconds) => {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
 
 export default function MusicPlayer({ open, onClose, onPlayingChange }) {
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [loopOne, setLoopOne] = useState(false)
+  const [muted, setMuted] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, duration: 0 })
   const audioRef = useRef(null)
   const dragRef = useRef(null)
 
   const track = MUSIC_TRACKS[index] || null
 
-  // 把播放状态透给 Navbar 的律动指示条
   useEffect(() => {
     onPlayingChange?.(playing)
   }, [playing, onPlayingChange])
@@ -51,8 +63,13 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
     }
   }, [playing, track])
 
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muted
+  }, [muted])
+
   const go = useCallback((delta) => {
     if (!MUSIC_TRACKS.length) return
+    setProgress({ current: 0, duration: 0 })
     setIndex((prev) => (prev + delta + MUSIC_TRACKS.length) % MUSIC_TRACKS.length)
   }, [])
 
@@ -64,6 +81,13 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  const onSeek = (e) => {
+    const audio = audioRef.current
+    const next = Number(e.target.value)
+    if (audio && Number.isFinite(next)) audio.currentTime = next
+    setProgress((p) => ({ ...p, current: next }))
+  }
 
   /* 在唱片上左右拖动换片 */
   const onPointerDown = (e) => {
@@ -81,9 +105,31 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
 
   if (!track) return null
 
+  const ratio = progress.duration > 0 ? progress.current / progress.duration : 0
+
   return (
     <>
-      {/* 收起时的常驻唱机入口由 Navbar 提供，这里只在打开时渲染面板 */}
+      {/*
+        音频元素永远挂着，且与面板显隐无关 —— 这样关掉面板、切路由都不会中断播放。
+        Navbar 常驻在 SiteLayout 里，所以整个会话期间它一直在。
+      */}
+      <audio
+        ref={audioRef}
+        src={trackSrc(track)}
+        loop={loopOne}
+        preload="metadata"
+        onTimeUpdate={(e) =>
+          setProgress({ current: e.currentTarget.currentTime, duration: e.currentTarget.duration || 0 })
+        }
+        onLoadedMetadata={(e) =>
+          setProgress((p) => ({ ...p, duration: e.currentTarget.duration || 0 }))
+        }
+        onEnded={() => {
+          if (!loopOne) go(1)
+        }}
+        className="hidden"
+      />
+
       {open ? (
         <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 md:items-center md:p-6">
           <button
@@ -103,6 +149,11 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                 <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-slate-400">
                   Turntable
                 </span>
+                {playing ? (
+                  <span className="ml-2 font-mono text-[10px] tracking-[0.18em] text-neon-lime/80">
+                    播放中 · 关掉面板不会停
+                  </span>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -124,12 +175,7 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                   className="relative w-full max-w-[240px] cursor-grab touch-none select-none active:cursor-grabbing"
                   title="左右拖动换唱片"
                 >
-                  <VinylRecord
-                    title={track.title}
-                    artist={track.artist}
-                    playing={playing}
-                    className="w-full"
-                  />
+                  <VinylRecord title={track.title} artist={track.artist} playing={playing} className="w-full" />
                   {/* 唱臂：播放时落到盘面，暂停时抬起 */}
                   <div
                     className="pointer-events-none absolute -right-2 -top-2 h-16 w-16 origin-top-right transition-transform duration-700 ease-expo-out"
@@ -147,8 +193,29 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                 </p>
               </div>
 
-              {/* 控制 + 唱片架 */}
+              {/* 控制 + 进度 + 唱片架 */}
               <div className="flex min-w-0 flex-col">
+                {/* 进度条 */}
+                <div className="mb-5">
+                  <input
+                    type="range"
+                    min={0}
+                    max={progress.duration || 0}
+                    step="0.1"
+                    value={Math.min(progress.current, progress.duration || 0)}
+                    onChange={onSeek}
+                    aria-label="播放进度"
+                    className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-neon-lime [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neon-lime"
+                    style={{
+                      background: `linear-gradient(90deg, #edff66 ${ratio * 100}%, rgba(255,255,255,0.1) ${ratio * 100}%)`,
+                    }}
+                  />
+                  <div className="mt-1.5 flex justify-between font-mono text-[10px] tracking-[0.14em] text-slate-500">
+                    <span>{formatTime(progress.current)}</span>
+                    <span>{formatTime(progress.duration)}</span>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
@@ -190,6 +257,20 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                   >
                     {loopOne ? <Repeat1 className="h-4 w-4" /> : <Repeat className="h-4 w-4" />}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setMuted((v) => !v)}
+                    aria-pressed={muted}
+                    aria-label={muted ? '取消静音' : '静音'}
+                    className={`grid h-10 w-10 place-items-center rounded-full border transition-colors ${
+                      muted
+                        ? 'border-neon-pink/50 text-neon-pink'
+                        : 'border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  </button>
                 </div>
 
                 {/* 唱片架 */}
@@ -199,6 +280,7 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                       <button
                         type="button"
                         onClick={() => {
+                          setProgress({ current: 0, duration: 0 })
                           setIndex(i)
                           setPlaying(true)
                         }}
@@ -224,21 +306,10 @@ export default function MusicPlayer({ open, onClose, onPlayingChange }) {
                 </ul>
 
                 <p className="mt-4 font-mono text-[10px] leading-relaxed tracking-[0.14em] text-slate-600">
-                  在唱片上左右拖动可换片 · 音频需放在 public/music/
+                  在唱片上左右拖动可换片 · 关掉面板继续播放 · 音频需放在 public/music/
                 </p>
               </div>
             </div>
-
-            <audio
-              ref={audioRef}
-              src={trackSrc(track)}
-              loop={loopOne}
-              preload="metadata"
-              onEnded={() => {
-                if (!loopOne) go(1)
-              }}
-              className="hidden"
-            />
           </div>
         </div>
       ) : null}
