@@ -16,10 +16,13 @@ export const DEFAULT_SCENE = 'home-hero'
 /**
  * 场景 → 背景定义。
  * wallpaper：WALLPAPERS 里的 index
- * video：可选，public/wallpapers/ 下的文件名
+ *
+ * 关于视频：2026-10-13 用户看过 53 个候选后决定「视频不用了」，
+ * 因此这里不再挂任何视频。WallpaperScene 在 scene.video 缺失时自动回落到静态图，
+ * 要恢复视频只需在此加一个 video 字段并把它接进 wallpapers.js。
  */
 export const SCENES = {
-  'home-hero': { wallpaper: 1, video: 'bg1.webm' },
+  'home-hero': { wallpaper: 1 },
   'home-about': { wallpaper: 2 },
   'home-features': { wallpaper: 3 },
   'home-story': { wallpaper: 4 },
@@ -74,4 +77,23 @@ export function sceneWallpaper(key) {
 export function sceneVideo(key) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
   return scene.video || null
+}
+
+/**
+ * 从「各区块相对视口的位置」中挑出当前生效的区块场景。
+ *
+ * rects 需按文档顺序给出（DOM 顺序），每项 { key, top, bottom }（top/bottom 来自
+ * getBoundingClientRect）。规则：取最后一个 top <= 0 的区块 —— 也就是「已经把视口
+ * 顶端盖过」的最靠下那个；还没滚到任何区块时返回 null，交回路由默认场景。
+ *
+ * 抽成纯函数是为了能在 jsdom 里直接测，不必真的滚动页面。
+ */
+export function pickActiveScene(rects) {
+  if (!Array.isArray(rects)) return null
+  let active = null
+  for (const rect of rects) {
+    if (!rect || typeof rect.top !== 'number' || !rect.key) continue
+    if (rect.top <= 0) active = rect.key
+  }
+  return active
 }

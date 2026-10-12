@@ -4,6 +4,7 @@ import {
   DEFAULT_SCENE,
   ROUTE_SCENES,
   SCENES,
+  pickActiveScene,
   resolveScene,
   sceneWallpaper,
 } from '../lib/backgrounds'
@@ -46,6 +47,47 @@ describe('resolveScene', () => {
   it('尾斜杠不影响解析', () => {
     expect(resolveScene('/about/')).toBe('about')
     expect(resolveScene('/')).toBe('home-hero')
+  })
+})
+
+describe('pickActiveScene', () => {
+  it('还没滚到任何区块时返回 null（交给路由默认）', () => {
+    expect(pickActiveScene([])).toBeNull()
+    expect(pickActiveScene([{ key: 'a', top: 100, bottom: 900 }])).toBeNull()
+  })
+
+  it('取「最后一个已经盖过视口顶端」的区块', () => {
+    expect(pickActiveScene([{ key: 'a', top: -500, bottom: 400 }])).toBe('a')
+    expect(
+      pickActiveScene([
+        { key: 'a', top: -2000, bottom: -1000 },
+        { key: 'b', top: -1000, bottom: 0 },
+        { key: 'c', top: 0, bottom: 1000 },
+      ]),
+    ).toBe('c')
+  })
+
+  it('多个区块同时盖过顶端时取最靠下的那个', () => {
+    expect(
+      pickActiveScene([
+        { key: 'a', top: -300, bottom: 600 },
+        { key: 'b', top: -100, bottom: 800 },
+      ]),
+    ).toBe('b')
+  })
+
+  it('滚过全部区块后仍停留在最后一个', () => {
+    expect(
+      pickActiveScene([
+        { key: 'a', top: -3000, bottom: -2000 },
+        { key: 'b', top: -2000, bottom: -1000 },
+      ]),
+    ).toBe('b')
+  })
+
+  it('非法输入不抛', () => {
+    expect(pickActiveScene(null)).toBeNull()
+    expect(pickActiveScene(undefined)).toBeNull()
   })
 })
 
