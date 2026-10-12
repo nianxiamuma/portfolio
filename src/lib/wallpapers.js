@@ -28,6 +28,7 @@ export const WALLPAPERS = [
     },
     scene: {
       image: `${BASE}wallpapers/wp1.jpg`,
+      video: `${BASE}wallpapers/bg1.webm`,
       base: 'linear-gradient(165deg, #1a2540 0%, #0d1428 48%, #04060f 100%)',
       blobA: 'radial-gradient(circle, rgba(122, 168, 255, 0.46), transparent 62%)',
       blobB: 'radial-gradient(circle, rgba(56, 88, 190, 0.34), transparent 66%)',
