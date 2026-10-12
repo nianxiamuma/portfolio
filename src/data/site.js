@@ -7,7 +7,8 @@ export const SITE = {
   name: '年下牧马',
   romaji: 'NIANXIA MUMA',
   tagline: '把喜欢的东西，留在手边。',
-  avatar: '/avatar.png',
+  // 部署基路径（GitHub Pages 项目页形如 /repo/）；字符串资源路径必须手动拼上它
+  avatar: `${import.meta.env.BASE_URL}avatar.png`,
   email: '807273679@qq.com',
   /** Hero 名片卡上的快捷入口 */
   shortcuts: [

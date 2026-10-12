@@ -8,6 +8,9 @@
  * 想换图：把新图放进 public/wallpapers/ 覆盖 wp1~wp4.jpg 即可，无需改代码。
  */
 
+/** 部署基路径（GitHub Pages 项目页形如 /repo/）；字符串资源路径必须手动拼上它，Vite 不会改写字符串 */
+const BASE = import.meta.env.BASE_URL
+
 export const WALLPAPERS = [
   {
     index: 1,
@@ -24,7 +27,7 @@ export const WALLPAPERS = [
       overlay: 'rgba(6, 10, 20, 0.6)',
     },
     scene: {
-      image: '/wallpapers/wp1.jpg',
+      image: `${BASE}wallpapers/wp1.jpg`,
       base: 'linear-gradient(165deg, #1a2540 0%, #0d1428 48%, #04060f 100%)',
       blobA: 'radial-gradient(circle, rgba(122, 168, 255, 0.46), transparent 62%)',
       blobB: 'radial-gradient(circle, rgba(56, 88, 190, 0.34), transparent 66%)',
@@ -49,7 +52,7 @@ export const WALLPAPERS = [
       overlay: 'rgba(16, 12, 18, 0.6)',
     },
     scene: {
-      image: '/wallpapers/wp2.jpg',
+      image: `${BASE}wallpapers/wp2.jpg`,
       base: 'linear-gradient(165deg, #2a1a12 0%, #1a1020 46%, #0a0610 100%)',
       blobA: 'radial-gradient(circle, rgba(255, 190, 110, 0.42), transparent 60%)',
       blobB: 'radial-gradient(circle, rgba(210, 110, 80, 0.3), transparent 66%)',
@@ -74,7 +77,7 @@ export const WALLPAPERS = [
       overlay: 'rgba(12, 9, 22, 0.6)',
     },
     scene: {
-      image: '/wallpapers/wp3.jpg',
+      image: `${BASE}wallpapers/wp3.jpg`,
       base: 'linear-gradient(165deg, #241735 0%, #170f2a 46%, #080512 100%)',
       blobA: 'radial-gradient(circle, rgba(200, 140, 255, 0.42), transparent 60%)',
       blobB: 'radial-gradient(circle, rgba(255, 130, 200, 0.26), transparent 66%)',
@@ -99,7 +102,7 @@ export const WALLPAPERS = [
       overlay: 'rgba(6, 14, 16, 0.6)',
     },
     scene: {
-      image: '/wallpapers/wp4.jpg',
+      image: `${BASE}wallpapers/wp4.jpg`,
       base: 'linear-gradient(165deg, #0d2a2b 0%, #08191f 46%, #03080c 100%)',
       blobA: 'radial-gradient(circle, rgba(120, 240, 210, 0.38), transparent 60%)',
       blobB: 'radial-gradient(circle, rgba(90, 170, 220, 0.3), transparent 66%)',
