@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ArrowRight, RotateCcw, X } from 'lucide-react'
-import { MAX_NUMBER, digitsOf, prizeForNumber } from '../lib/slotMachine'
+import { ArrowRight, ExternalLink, RotateCcw, X } from 'lucide-react'
+
+import { ORACLE_KINDS } from '../data/oracle'
+import { MAX_NUMBER, digitsOf, drawFor, wallpaperSrc } from '../lib/oracle'
 
 const ROLL_INTERVAL = 90
 const ROLL_DURATION = 1100
@@ -9,7 +10,10 @@ const REELS = ['HUN', 'TEN', 'ONE']
 
 /**
  * SOURCE SLOT：一台决定「接下来看什么」的街机。
- * 拉动拉杆 → 三位数字滚动 → 落地后按号码档位给出一个去处。
+ * 拉动拉杆 → 三位数字滚动 → 落地后抽出一张纸条（诗/骈文/俳句/台词/名句/答案之书），
+ * 同时配一张壁纸。
+ *
+ * 2026-10-14 改版：原来是「号码 → 去哪个页面」的三档奖励，按需求换成纸条 + 壁纸。
  */
 export default function Contact() {
   const [digits, setDigits] = useState(['0', '0', '0'])
@@ -18,7 +22,6 @@ export default function Contact() {
   const [history, setHistory] = useState([])
   const drawingRef = useRef(false)
   const timerRef = useRef(null)
-  const navigate = useNavigate()
 
   useEffect(() => () => clearInterval(timerRef.current), [])
 
@@ -38,9 +41,9 @@ export default function Contact() {
         setDigits(target)
         setRolling(false)
         drawingRef.current = false
-        const prize = prizeForNumber(number)
-        setResult({ number, prize })
-        setHistory((prev) => [{ number, prize }, ...prev].slice(0, 8))
+        const drawn = drawFor(number)
+        setResult(drawn)
+        setHistory((prev) => [drawn, ...prev].slice(0, 8))
         return
       }
       setDigits(Array.from({ length: 3 }, () => String(Math.floor(Math.random() * 10))))
@@ -67,7 +70,7 @@ export default function Contact() {
             </h2>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-slate-500">
-            不知道先看哪页？拉一下，0–998 随便抽一个。
+            拉一下，0–998 随便抽一个。抽到什么纸条就是什么，顺带给你一张壁纸。
           </p>
         </header>
 
@@ -148,46 +151,93 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* 结果 */}
+      {/* 结果：一张纸条 + 一张壁纸 */}
       {result ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-6">
           <div
             className="absolute inset-0 bg-void-950/85 backdrop-blur-xl"
             onClick={() => setResult(null)}
           />
-          <div className="relative w-full max-w-md rounded-3xl border border-white/[0.09] bg-void-900 p-8 text-center animate-fade-rise">
+          <div
+            data-testid="oracle-slip"
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/[0.09] bg-void-900 text-center animate-fade-rise"
+          >
             <button
               type="button"
               onClick={() => setResult(null)}
               aria-label="关闭"
-              className="absolute right-5 top-5 text-slate-500 transition-colors hover:text-white"
+              className="absolute right-4 top-4 z-10 text-slate-400 transition-colors hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <p className="font-mono text-[10px] uppercase tracking-[0.42em] text-slate-500">
-              {String(result.number).padStart(3, '0')}
-            </p>
-            <h3
-              className="mt-5 text-4xl font-bold tracking-tightest"
-              style={{ color: result.prize.accent }}
-            >
-              {result.prize.label}
-            </h3>
-            <p className="mt-4 text-sm text-slate-400">{result.prize.desc}</p>
+            {/* 壁纸铺在纸条上方，向下渐隐进正文 */}
+            <div className="relative h-52 overflow-hidden">
+              {result.wallpaper ? (
+                <img
+                  src={wallpaperSrc(result.wallpaper)}
+                  alt=""
+                  draggable={false}
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
+              <div className="absolute inset-0 bg-gradient-to-b from-void-950/25 via-void-950/55 to-void-900" />
 
-            <button
-              type="button"
-              onClick={() => {
-                const to = result.prize.to
-                setResult(null)
-                navigate(to)
-              }}
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-semibold text-void-950 transition-all duration-500 ease-expo-out hover:shadow-glow-lime"
-            >
-              去这里
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+              {result.slip ? (
+                <span
+                  className="absolute left-4 top-4 rounded-full border bg-void-950/50 px-3 py-1 font-mono text-[10px] tracking-[0.22em] backdrop-blur-sm"
+                  style={{
+                    borderColor: `${ORACLE_KINDS[result.slip.kind].accent}66`,
+                    color: ORACLE_KINDS[result.slip.kind].accent,
+                  }}
+                >
+                  {(ORACLE_KINDS[result.slip.kind] || {}).label || result.slip.kind}
+                </span>
+              ) : null}
+
+              <span className="absolute bottom-3 right-4 font-mono text-[11px] tracking-[0.22em] text-white/50">
+                {String(result.number).padStart(3, '0')}
+              </span>
+            </div>
+
+            <div className="px-7 pb-7">
+              <p className="mt-2 font-serif text-[clamp(1.15rem,3.4vw,1.55rem)] font-semibold leading-relaxed text-white">
+                {result.slip ? result.slip.text : '这次没抽到纸条'}
+              </p>
+              {result.slip ? (
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                  {result.slip.source}
+                </p>
+              ) : null}
+
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={draw}
+                  disabled={rolling}
+                  className="inline-flex items-center gap-2 rounded-full bg-neon-lime px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-void-950 transition-shadow duration-500 hover:shadow-glow-lime disabled:opacity-70"
+                >
+                  再抽一张
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+
+                {result.wallpaper ? (
+                  <a
+                    href={wallpaperSrc(result.wallpaper)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/[0.12] px-5 py-3 text-xs text-slate-300 transition-colors duration-500 hover:border-white/30 hover:text-white"
+                  >
+                    看这张大图
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                ) : null}
+
+                <button type="button" onClick={() => setResult(null)} className="nav-hover-btn px-2">
+                  收起
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
