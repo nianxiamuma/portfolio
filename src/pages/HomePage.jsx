@@ -2,6 +2,7 @@ import HomeIntro from '../components/HomeIntro'
 import Hero from '../components/Hero'
 import About from '../components/About'
 import Features from '../components/Features'
+import Segments from '../components/Segments'
 import Story from '../components/Story'
 import Contact from '../components/Contact'
 
@@ -12,6 +13,7 @@ export default function HomePage() {
       <Hero />
       <About />
       <Features />
+      <Segments />
       <Story />
       <Contact />
     </>

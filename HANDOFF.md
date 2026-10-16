@@ -9,8 +9,12 @@
 
 **这个仓库现在的状态**：本地 `main` 领先 `origin/main` **5 个提交**（`3456a44` 抽奖机、`a92bba8` 友链真提交、`df87935` handoff、`24e9356` 来源页、`0abd7ef` 文章结构能力），工作区干净，**还没 push**。
 
-**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`
-用户已批准 **方案 B「结构补齐」**，共 6 波，**Wave 2 / 5 / 3 / 6 已完成**，Wave 1 性能项已完成定位（结论见下），仅剩「push / 删死代码」两项用户拍板。
+**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）
+
+**二期新增（2026-10-16，对标参照站补完成度）**：
+- **站点小部件**（Hero 底部）：时钟/问候语/时光进度条/今日一句 —— `src/lib/timeParts.js`、`src/lib/dailySlip.js`（按日期哈希从 52 条纸条库取当日一句，不引外部 API）、`src/components/SiteWidgets.jsx`。interval 在 `document.hidden` 时暂停（fps 纪律）。
+- **片段叙事段**（About 与 Story 之间）：`src/components/Segments.jsx`，六片段单源数据（`SEGMENTS` 数组，编号↔路由↔配图只写一处——taozhiyy 双轨漂移的反面教材）；媒体用壁纸静帧；IO 揭示入场（复用 Story 模式，零新增常驻动画）。
+- **PWA**：`public/manifest.webmanifest`（start_url/scope 用相对 `./`，子路径部署免改）+ `public/sw.js`（手写无插件；壳缓存 portfolio-shell-v1，导航 network-first 回退壳页，**88MB 壁纸池明确不缓存**）+ `src/lib/registerSW.js`（仅 PROD + https/localhost 注册）。图标三件套 `public/icons/`（SVG + 192/512 PNG，由 SVG 经 headless Chrome 渲染导出）。
 
 **Wave 6 布局实测结论（2026-10-16）**：罗盘 8 卡在 1440/768 两档实测零重叠零越界（几何探针），375 以下选择器整层 `hidden md:block` 不渲染——「窄屏拥挤」风险关闭，无需修复。
 **性能定位修正（2026-10-16，fps-probe 实测）**：冷/热差异可忽略（avg 28.69 vs 28.37ms），「冷启动尖峰」假设证伪；掉帧真源是**常驻 CSS 动画**——`RIVET_KILL=anim` 后 avg 17.09ms、over33ms 6 次 vs 基线 59 次。若要做性能优化，方向是动画减量/降频（需用户拍板取舍，未动）。

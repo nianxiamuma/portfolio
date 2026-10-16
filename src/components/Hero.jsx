@@ -7,6 +7,7 @@ import { ArrowUpRight } from 'lucide-react'
 import WallpaperScene from './WallpaperScene'
 import HeroWordmark from './HeroWordmark'
 import HeroProfileCard from './HeroProfileCard'
+import SiteWidgets from './SiteWidgets'
 import Petals from './Petals'
 import {
   ALL_COVERS,
@@ -217,6 +218,11 @@ export default function Hero() {
             <span className="font-mono text-[10px] uppercase tracking-[0.34em] text-white/35">
               scroll ↓
             </span>
+          </div>
+
+          {/* 站点小部件条：时钟 / 问候 / 时光进度 / 今日一句 */}
+          <div className="mt-8">
+            <SiteWidgets />
           </div>
         </div>
       </div>

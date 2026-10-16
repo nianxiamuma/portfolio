@@ -56,7 +56,7 @@ export default function Contact() {
         <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="flex items-center gap-4">
-              <span className="font-mono text-[10px] tracking-[0.2em] text-neon-lime/70">05</span>
+              <span className="font-mono text-[10px] tracking-[0.2em] text-neon-lime/70">06</span>
               <span className="h-px w-8 bg-white/15" />
               <span className="font-mono text-[10px] uppercase tracking-[0.42em] text-slate-500">
                 Fortune
