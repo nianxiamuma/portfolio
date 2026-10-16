@@ -7,10 +7,13 @@
 
 ## 〇、新会话从这里开始（30 秒上手）
 
-**这个仓库现在的状态**：本地 `main` 领先 `origin/main` **2 个提交**（`3456a44` 抽奖机、`a92bba8` 友链真提交），工作区干净，**还没 push**。
+**这个仓库现在的状态**：本地 `main` 领先 `origin/main` **5 个提交**（`3456a44` 抽奖机、`a92bba8` 友链真提交、`df87935` handoff、`24e9356` 来源页、`0abd7ef` 文章结构能力），工作区干净，**还没 push**。
 
 **正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`
-用户已批准 **方案 B「结构补齐」**，共 6 波，**Wave 2 已完成**，剩下 Wave 5 / 3 / 6 / 1。
+用户已批准 **方案 B「结构补齐」**，共 6 波，**Wave 2 / 5 / 3 / 6 已完成**，Wave 1 性能项已完成定位（结论见下），仅剩「push / 删死代码」两项用户拍板。
+
+**Wave 6 布局实测结论（2026-10-16）**：罗盘 8 卡在 1440/768 两档实测零重叠零越界（几何探针），375 以下选择器整层 `hidden md:block` 不渲染——「窄屏拥挤」风险关闭，无需修复。
+**性能定位修正（2026-10-16，fps-probe 实测）**：冷/热差异可忽略（avg 28.69 vs 28.37ms），「冷启动尖峰」假设证伪；掉帧真源是**常驻 CSS 动画**——`RIVET_KILL=anim` 后 avg 17.09ms、over33ms 6 次 vs 基线 59 次。若要做性能优化，方向是动画减量/降频（需用户拍板取舍，未动）。
 
 **两件挂着等用户拍板的事**（不要自行执行）：
 1. 删除死代码 `src/lib/slotMachine.js` 与 `src/__tests__/slotMachine.test.js` —— 逻辑已搬到 `src/lib/oracle.js`，删除不可逆
@@ -76,8 +79,8 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 | `3456a44` | 抽奖机改为抽「纸条 + 壁纸」 |
 | `a92bba8` | 友链申请从假动作改为真提交 |
 
-**页面**：`/` `/about` `/glimmer` `/collection` `/friends` `/guestbook` `/blog` `/blog/:slug`
-**测试**：13 个文件 **105 项**，全绿
+**页面**：`/` `/about` `/glimmer` `/collection` `/friends` `/guestbook` `/blog` `/blog/:slug` `/archive` `/tags` `/tags/:tag` `/sources`
+**测试**：17 个文件 **138 项**，全绿
 
 **素材规模**：`public/wallpapers/scene/` 22 张（场景壁纸）、`public/wallpapers/oracle/` 42 张（抽奖机壁纸池），合计约 88MB。
 
@@ -155,11 +158,11 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 
 ### 计划内待开发（方案 B）
 
-5. **Wave 5**：`/sources` 来源与致谢页（素材来源 + 授权状态 + 非商用边界）+ 导航入口
-6. **Wave 3**：文章系统结构能力——`searchIndex.js` 全文搜索、`postOutline.js` 目录、`/archive` `/tags` `/tags/:tag`、PostPage 的 TOC/阅读进度/相关文章、构建期 `feed.xml`
-   - ⚠ 前提：**文章只有 3 篇**（`src/data/posts.js:20` `:42` `:63`），其中 2 篇是代笔草稿待用户重写。结构可以先搭，但价值要等内容
-7. **Wave 6**：罗盘 8 张封面卡在窄屏的布局（**未验证风险**，只在 1440×900 看过）
-8. **Wave 1**：补跑抽奖机两项受阻验收；冷启动性能优化 + 复测
+5. ~~**Wave 5**：`/sources` 来源与致谢页~~ ✅ 已完成（`24e9356`）
+6. ~~**Wave 3**：文章系统结构能力~~ ✅ 已完成（`0abd7ef`）：`/archive` 归档、`/tags` 标签云、`/tags/:tag`、`searchIndex.js` + Cmd/Ctrl+K 搜索面板、`postOutline.js` TOC、阅读进度条、相关文章、构建期 `feed.xml`
+   - ⚠ 仍成立：**文章只有 3 篇**（`src/data/posts.js:20` `:42` `:63`），其中 2 篇是代笔草稿待用户重写。结构已就绪，价值要等内容
+7. ~~**Wave 6**：罗盘 8 张封面卡窄屏布局~~ ✅ 已实测关闭（1440/768 零重叠零越界；<768 选择器不渲染）；键盘可达性已补齐：SearchPanel（Ctrl+K/Esc/Enter/↑↓ 全实测）、Navbar 抽屉 Esc、MusicPlayer Esc 原有、全局 `:focus-visible` 原有
+8. ~~**Wave 1**：抽奖机两项受阻验收~~ ✅ 已补跑通过（纸条两次不同 + 壁纸 naturalWidth 1920x1080）；~~冷启动性能~~ ✅ 已定位（结论：冷启假设证伪，真源是常驻 CSS 动画，优化方向待用户拍板）
 
 ### 更早遗留
 
@@ -171,11 +174,12 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 
 ## 七、未验证项（诚实清单）
 
-- **抽奖机「再抽一张」能换纸条**：脚本化验收写好了但**未跑成**（当时 shell 环境故障，`cd`/`node` 报 command not found），只有一次 `el.click()` 路径的截图
-- **移动端罗盘 8 张卡片**：只在 1440×900 截图验证过，375/768 窄屏未测
+- ~~**抽奖机「再抽一张」能换纸条**~~ ✅ 已验证（2026-10-16，oracle-probe 两次实跑 `textChangedBetweenDraws: true`、壁纸 `naturalWidth 1920x1080`）
+- ~~**移动端罗盘 8 张卡片**~~ ✅ 已验证关闭（2026-10-16 几何探针：1440/768 零重叠零越界；375 以下选择器 `hidden md:block` 不渲染，无布局可言）
 - **扬声器真的出声**：headless 无音频输出设备。能确证的是浏览器层面播放已启动（`paused=false`）、文件 200、src 正确
-- **平板（768）截图**未逐字复核
+- **平板（768）截图**已补（罗盘探针），其余页面未逐字复核
 - 「移动端不加载视频」用 DOM 实测过（375 视口 `<video>` 数 = 0），**未做网络层抓包**
+- **Cmd+K 搜索面板**：唤出/搜索/Esc/Enter 跳转已用 CDP 实测（DOM keydown 路径）；真实组合键在 headless 下无法注入验证，真人浏览器行为待用户自测
 - 测试覆盖数据与渲染，**端到端交互**靠 `.rivet/scratch/` 那批 CDP 探针补，不是 CI 的一部分
 
 ---
@@ -190,6 +194,11 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 | 背景层渲染逻辑 | `src/components/BackgroundStage.jsx` · `src/context/BackgroundContext.jsx` |
 | 抽奖机纸条库 / 壁纸池清单 | `src/data/oracle.js` + `src/lib/oracle.js` |
 | 文章 | `src/data/posts.js` |
+| 文章正文结构（## 标题/代码块/引用 → TOC） | `src/lib/postOutline.js` |
+| 全文搜索（权重/分词） | `src/lib/searchIndex.js` · `src/components/SearchPanel.jsx` |
+| RSS 订阅（构建期生成） | `vite.config.js` 的 `rssFeed()` |
+| 素材来源声明 | `src/pages/SourcesPage.jsx` |
+| 归档/标签 | `src/pages/ArchivePage.jsx` · `src/pages/TagsPage.jsx` |
 | 音乐曲目清单 | `src/data/music.js`（音频放 `public/music/`，**不进仓库**） |
 | 藏书 / 游戏 | `src/components/Bookshelf.jsx` · `src/components/GameShowcase.jsx` |
 | 友链数据 / 友链申请 | `src/data/friends.js` · `src/lib/friendLink.js` · `.github/ISSUE_TEMPLATE/friend-link.yml` |

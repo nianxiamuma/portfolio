@@ -84,6 +84,16 @@ export default function Navbar() {
     setDrawerOpen(false)
   }, [pathname])
 
+  /* 键盘可达性：Esc 关闭移动抽屉 */
+  useEffect(() => {
+    if (!drawerOpen) return undefined
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setDrawerOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [drawerOpen])
+
   useEffect(() => {
     if (drawerOpen) {
       document.body.style.overflow = 'hidden'
