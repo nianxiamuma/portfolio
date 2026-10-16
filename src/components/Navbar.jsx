@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Music } from 'lucide-react'
 import VisitorNetworkBadge from './VisitorNetworkBadge'
+import ServerPulseBadge from './ServerPulseBadge'
 import MusicPlayer from './MusicPlayer'
 import { MUSIC_TRACKS, musicAvailable, trackSrc } from '../data/music'
 
@@ -136,6 +137,7 @@ export default function Navbar() {
                 <button type="button" onClick={openCoverSelector} className="nav-hover-btn hidden md:block">
                   Switch Cover
                 </button>
+                <ServerPulseBadge className="hidden xl:inline-flex" />
                 <VisitorNetworkBadge className="hidden lg:inline-flex" />
               </>
             ) : null}

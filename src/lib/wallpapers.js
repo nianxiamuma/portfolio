@@ -186,27 +186,95 @@ export const EXTRA_COVERS = [
   },
 ]
 
-/** 罗盘上所有可选封面 = 原来 4 张 + 追加 4 张 */
+/** 罗盘上所有可选封面 = 8 张现有封面（扩 12 月方案见下方 MONTH_COVERS） */
 export const ALL_COVERS = [...WALLPAPERS, ...EXTRA_COVERS]
 
 export const getWallpaper = (index) =>
   ALL_COVERS.find((item) => item.index === index) || ALL_COVERS[0]
 
+/** 12 个月的罗盘背景：暂从 oracle 图库按序取 12 张；立绘/主题图到位后逐月替换 */
+const ORACLE_BG = [
+  'wallhaven-216o5y.png',
+  'wallhaven-3zmr6y.jpg',
+  'wallhaven-4dk13n.jpg',
+  'wallhaven-5d1m61.png',
+  'wallhaven-72drx3.jpg',
+  'wallhaven-72pgxv.jpg',
+  'wallhaven-72r8ry.jpg',
+  'wallhaven-8o3m71.jpg',
+  'wallhaven-8o77d1.jpg',
+  'wallhaven-dp7gkm.png',
+  'wallhaven-g8g6re.png',
+  'wallhaven-gp7mq3.jpg',
+]
+
+/**
+ * ── 12 月份罗盘方案 ──
+ * 12 张封面按月份排列在罗盘上（每张占 30°），并各配一张「依月份生成的美少女立绘」。
+ * 立绘文件放在 public/portraits/m{n}.png（如 m1.png = 一月）。
+ * 立绘生成后放置到位即可；文件不存在时立绘层自动隐藏，页面不白屏。
+ *
+ * 月份 → 角度：1月=0°(正上)，之后每月 +30°，12月=330°。
+ */
+export const MONTH_COVERS = [
+  { month: 1, index: 1, name: '睦月', angle: 0, poem: ['寒宵正是读书天', '一盏青灯伴雪眠'], style: '雪夜灯下、靛蓝和服、静谧' },
+  { month: 2, index: 2, name: '如月', angle: 30, poem: ['梅心已自暖', '不必待春风'], style: '早梅初绽、浅粉气息、含蓄' },
+  { month: 3, index: 3, name: '弥生', angle: 60, poem: ['春路雨添花', '花动一山春色'], style: '樱花满开、嫩绿新装、明亮' },
+  { month: 4, index: 4, name: '卯月', angle: 90, poem: ['人间四月芳菲尽', '山寺桃花始盛开'], style: '花吹雪、水手服、清澈' },
+  { month: 5, index: 5, name: '皋月', angle: 120, poem: ['绿树阴浓夏日长', '楼台倒影入池塘'], style: '新绿浓荫、风铃浴衣、清爽' },
+  { month: 6, index: 6, name: '水无月', angle: 150, poem: ['黄梅时节家家雨', '青草池塘处处蛙'], style: '梅雨紫阳花、透明雨伞、朦胧' },
+  { month: 7, index: 7, name: '文月', angle: 180, poem: ['接天莲叶无穷碧', '映日荷花别样红'], style: '盛夏蝉鸣、祭典浴衣、炽烈' },
+  { month: 8, index: 8, name: '叶月', angle: 210, poem: ['银烛秋光冷画屏', '轻罗小扇扑流萤'], style: '向晚流萤、草帽白裙、怀旧' },
+  { month: 9, index: 9, name: '长月', angle: 240, poem: ['秋风起兮白云飞', '草木黄落兮雁南归'], style: '初秋微凉、金穗夕阳、温柔' },
+  { month: 10, index: 10, name: '神无月', angle: 270, poem: ['霜叶红于二月花', '白云生处有人家'], style: '红叶漫山、披巾毛衣、沉静' },
+  { month: 11, index: 11, name: '霜月', angle: 300, poem: ['晚来天欲雪', '能饮一杯无'], style: '初霜清晨、围巾暖炉、安然' },
+  { month: 12, index: 12, name: '师走', angle: 330, poem: ['绿蚁新醅酒', '红泥小火炉'], style: '岁末灯彩、白色大衣、温暖' },
+].map((item, i) => ({
+  ...item,
+  direction: `M${item.month}`,
+  label: `${item.month}月`,
+  portrait: `${BASE}portraits/m${item.month}.png`,
+  /* 背景暂从 oracle 图库按序取用；立绘到位后可逐月换成当月主题图 */
+  theme: {
+    accent: ['#f2f6ff', '#ffd9ec', '#ffe7b8', '#d9fff3', '#c8f0ff', '#e3d4ff', '#ffe0e6', '#fff3c4', '#ffd9b8', '#ffb8b8', '#d4e5ff', '#e8dcff'][i],
+    line: 'rgba(255,255,255,0.35)',
+    soft: 'rgba(150,180,255,0.15)',
+    glow: 'rgba(190,215,255,0.3)',
+    overlay: 'rgba(6, 10, 20, 0.6)',
+  },
+  scene: {
+    image: `${BASE}wallpapers/oracle/${ORACLE_BG[i]}`,
+  },
+}))
+
+/** 12 月方案的完整封面清单（罗盘与立绘层的数据源） */
+export const MONTH_LIST = MONTH_COVERS
+
+/** 按 index 取月份封面（12 月方案专用，与旧 8 项清单互不干扰） */
+export const getMonthCover = (index) =>
+  MONTH_COVERS.find((item) => item.index === index) || MONTH_COVERS[0]
+
+/** 按访客当地月份返回 12 月方案的封面 index（罗盘仍可手动切换，此处只是初值） */
+export function monthlyCoverIndex(date = new Date()) {
+  const month = (typeof date?.getMonth === 'function' ? date.getMonth() : 0) + 1
+  return MONTH_COVERS.find((item) => item.month === month)?.index || 1
+}
+
 /** 罗盘 32 刻度 */
 export const COMPASS_TICKS = 32
 
 /**
- * 罗盘卡片的屏幕方位，按 **cover.index** 索引 —— 必须与该 cover 的 angle 一一对应，
- * 否则指针指的方向和卡片所在的位置会错位。
- * 角度 → 方位：0=N上 / 45=NE右上 / 90=E右 / 135=SE右下 / 180=S下 / 225=SW左下 / 270=W左 / 315=NW左上
+ * 罗盘卡片布点：按 cover.angle 把卡片均匀放到以罗盘为圆心的椭圆轨道上。
+ * 12 张卡用三角函数自动布点，不再手写每个方位的类名。
+ * 返回内联样式（left/top/translate），角度 0° = 正上，顺时针为正，与罗盘角度一致。
  */
-export const COMPASS_CARD_POSITIONS = {
-  1: 'left-1/2 top-[-2%] -translate-x-1/2', // 0° N
-  2: 'left-[80%] top-1/2 -translate-x-1/2 -translate-y-1/2', // 90° E
-  3: 'left-1/2 top-[96%] -translate-x-1/2 -translate-y-full', // 180° S
-  4: 'left-[20%] top-1/2 -translate-x-1/2 -translate-y-1/2', // 270° W
-  5: 'left-[74%] top-[9%] -translate-x-1/2', // 45° NE
-  6: 'left-[74%] top-[71%] -translate-x-1/2', // 135° SE
-  7: 'left-[26%] top-[71%] -translate-x-1/2', // 225° SW
-  8: 'left-[26%] top-[9%] -translate-x-1/2', // 315° NW
+export function compassCardStyle(angle, { rx = 42, ry = 40 } = {}) {
+  const rad = ((angle - 90) * Math.PI) / 180 // 0°在正上 → 数学角 90°
+  const x = 50 + rx * Math.cos(rad)
+  const y = 50 + ry * Math.sin(rad)
+  return {
+    left: `${x}%`,
+    top: `${y}%`,
+    transform: 'translate(-50%, -50%)',
+  }
 }

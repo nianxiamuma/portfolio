@@ -10,10 +10,11 @@ import HeroProfileCard from './HeroProfileCard'
 import SiteWidgets from './SiteWidgets'
 import Petals from './Petals'
 import {
-  ALL_COVERS,
-  COMPASS_CARD_POSITIONS,
   COMPASS_TICKS,
-  getWallpaper,
+  MONTH_COVERS,
+  getMonthCover,
+  monthlyCoverIndex,
+  compassCardStyle,
 } from '../lib/wallpapers'
 import {
   indexFromRotation,
@@ -24,10 +25,10 @@ import {
 
 gsap.registerPlugin(ScrollTrigger)
 
-const COMPASS_ITEMS = ALL_COVERS.map(({ index, angle, label }) => ({ index, angle, label }))
+const COMPASS_ITEMS = MONTH_COVERS.map(({ index, angle, label }) => ({ index, angle, label }))
 
 export default function Hero() {
-  const [current, setCurrent] = useState(1)
+  const [current, setCurrent] = useState(() => monthlyCoverIndex())
   const [previous, setPrevious] = useState(1)
   const [hasSwitched, setHasSwitched] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -42,14 +43,18 @@ export default function Hero() {
   const dragRef = useRef(null)
 
   const pointedIndex = indexFromRotation(rotation, COMPASS_ITEMS)
-  const activeWallpaper = getWallpaper(selectorOpen ? pointedIndex : current)
-  const pointed = getWallpaper(pointedIndex)
+  const activeWallpaper = getMonthCover(selectorOpen ? pointedIndex : current)
+  const pointed = getMonthCover(pointedIndex)
   const theme = activeWallpaper.theme
+  /* 12 月立绘：当前月份封面的人物立绘；逐张跟踪加载状态，失败的图隐藏、其他月份不受影响 */
+  const activeCover = getMonthCover(current)
+  const [failedPortraits, setFailedPortraits] = useState(() => new Set())
+  const portraitOk = activeCover.portrait && !failedPortraits.has(activeCover.portrait)
 
   /* 导航栏的 SWITCH COVER 按钮通过全局事件唤起选择器 */
   useEffect(() => {
     const open = () => {
-      const active = ALL_COVERS.find((w) => w.index === current)
+      const active = MONTH_COVERS.find((w) => w.index === current)
       setRotation(active ? active.angle : 0)
       setSelectorOpen(true)
     }
@@ -163,13 +168,13 @@ export default function Hero() {
       <div ref={frameRef} className="relative z-10 h-dvh w-screen overflow-hidden bg-void-950">
         {/* 当前壁纸 */}
         <div ref={sceneRef} className="absolute inset-0">
-          <WallpaperScene wallpaper={getWallpaper(current)} />
+          <WallpaperScene wallpaper={getMonthCover(current)} />
         </div>
 
         {/* 转场中的上一张 */}
         {isTransitioning ? (
           <div ref={prevLayerRef} className="pointer-events-none absolute inset-0 z-30">
-            <WallpaperScene wallpaper={getWallpaper(previous)} />
+            <WallpaperScene wallpaper={getMonthCover(previous)} />
           </div>
         ) : null}
 
@@ -181,8 +186,27 @@ export default function Hero() {
 
         <Petals className="z-[36]" />
 
+        {/* 月份美少女立绘：立在主文案左侧，图片缺失时自动隐藏 */}
+        {portraitOk && activeCover.portrait ? (
+          <div className="pointer-events-none absolute bottom-0 left-[6%] z-[37] hidden h-[78%] lg:block">
+            <img
+              src={activeCover.portrait}
+              alt=""
+              onError={() =>
+                setFailedPortraits((prev) => {
+                  if (prev.has(activeCover.portrait)) return prev
+                  const next = new Set(prev)
+                  next.add(activeCover.portrait)
+                  return next
+                })
+              }
+              className="h-full w-auto object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+            />
+          </div>
+        ) : null}
+
         <HeroWordmark
-          wallpaper={getWallpaper(current)}
+          wallpaper={getMonthCover(current)}
           className="right-6 top-24 md:right-14 md:top-32"
         />
 
@@ -345,8 +369,8 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* 四张封面卡 */}
-            {ALL_COVERS.map((wp) => {
+            {/* 12 张月份封面卡：按角度自动布点 */}
+            {MONTH_COVERS.map((wp) => {
               const isPointed = wp.index === pointedIndex
               return (
                 <button
@@ -356,22 +380,22 @@ export default function Hero() {
                     setRotation(wp.angle)
                     selectWallpaper(wp.index, { close: false })
                   }}
-                  className={`pointer-events-auto absolute z-20 overflow-hidden rounded-lg border text-left transition-all duration-500 ease-expo-out ${COMPASS_CARD_POSITIONS[wp.index]}`}
+                  className={`pointer-events-auto absolute z-20 overflow-hidden rounded-lg border text-left transition-all duration-500 ease-expo-out ${isPointed ? 'scale-[1.06]' : 'scale-100'}`}
                   style={{
-                    width: 'clamp(150px, 13.5vw, 234px)',
+                    ...compassCardStyle(wp.angle),
+                    width: 'clamp(110px, 10vw, 170px)',
                     aspectRatio: '16 / 9',
                     borderColor: isPointed ? theme.accent : 'rgba(255,255,255,0.14)',
                     boxShadow: isPointed
                       ? `0 18px 60px ${theme.glow}`
                       : '0 12px 40px rgba(0,0,0,0.5)',
-                    transform: isPointed ? 'scale(1.04)' : 'scale(1)',
                   }}
                 >
                   <WallpaperScene wallpaper={wp} />
-                  <span className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent px-3 py-2">
-                    <span className="text-xs font-semibold text-white">{wp.name}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/60">
-                      {wp.direction}
+                  <span className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/80 to-transparent px-2.5 py-1.5">
+                    <span className="text-[11px] font-semibold text-white">{wp.name}</span>
+                    <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/60">
+                      {wp.label}
                     </span>
                   </span>
                 </button>
