@@ -8,11 +8,6 @@ import { useEffect, useState } from 'react'
  * 图片同时作为 video 的 poster，视频加载中/失败时都有画面，不会黑屏。
  */
 
-const pos = (value) => {
-  const [x = '50%', y = '50%'] = String(value).split(' ')
-  return { left: x, top: y }
-}
-
 export default function WallpaperScene({ wallpaper, className = '' }) {
   const { scene, dim = 0 } = wallpaper
   const [videoAllowed, setVideoAllowed] = useState(false)
@@ -36,7 +31,6 @@ export default function WallpaperScene({ wallpaper, className = '' }) {
 
   const useVideo = Boolean(scene.video) && videoAllowed
   const useImage = !useVideo && Boolean(scene.image)
-  const useGenerated = !useVideo && !scene.image
 
   return (
     <div className={`absolute inset-0 overflow-hidden bg-void-950 ${className}`} aria-hidden>
@@ -63,19 +57,7 @@ export default function WallpaperScene({ wallpaper, className = '' }) {
         />
       ) : null}
 
-      {useGenerated ? (
-        <>
-          <div className="absolute inset-0" style={{ background: scene.base }} />
-          <div
-            className="absolute h-[62vw] w-[62vw] animate-drift-slow rounded-full blur-[90px]"
-            style={{ background: scene.blobA, ...pos(scene.blobAPos) }}
-          />
-          <div
-            className="absolute h-[54vw] w-[54vw] animate-drift-medium rounded-full blur-[100px]"
-            style={{ background: scene.blobB, ...pos(scene.blobBPos) }}
-          />
-        </>
-      ) : null}
+      {/* 无图时不再生成渐变/光斑——按需求「所有背景不要渐变」，回落纯深色底 */}
 
       {/* 压暗遮罩：保证前景文字可读 */}
       <div className="absolute inset-0 bg-gradient-to-b from-void-950/60 via-void-950/20 to-void-950/90" />

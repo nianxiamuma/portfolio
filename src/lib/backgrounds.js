@@ -41,6 +41,13 @@ export const SCENES = {
     images: ['scene-home-story.jpg', 'scene-home-story-2.jpg'],
   },
   'home-slot': { name: '暗翼', dim: 0.35, images: ['scene-home-slot.jpg', 'scene-home-slot-2.jpg'] },
+  // 「片段」段原来复用 home-features，下滑到这一段背景不变；
+  // 独立成景后每次下滑都会换图（#1.1 逐段换图）
+  'home-fragments': {
+    name: '藏卷',
+    dim: 0.4,
+    images: ['scene-fragments.jpg', 'scene-fragments-2.jpg'],
+  },
   about: { name: '旧城', dim: 0.5, images: ['scene-about.jpg', 'scene-about-2.jpg'] },
   glimmer: { name: '春信', dim: 0.4, images: ['scene-glimmer.jpg', 'scene-glimmer-2.jpg'] },
   collection: {

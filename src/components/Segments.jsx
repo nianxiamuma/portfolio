@@ -164,7 +164,7 @@ function SegmentCard({ seg }) {
 
 export default function Segments() {
   return (
-    <section id="fragments" data-bg-scene="home-features" className="relative py-24 lg:py-36">
+    <section id="fragments" data-bg-scene="home-fragments" className="relative py-24 lg:py-36">
       <div className="mx-auto max-w-shell px-6 md:px-10 lg:px-16">
         {/* 段头 */}
         <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
