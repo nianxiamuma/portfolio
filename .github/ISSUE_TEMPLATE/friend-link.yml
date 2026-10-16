@@ -1,0 +1,34 @@
+name: 友链申请
+description: 申请把您的站点加进本站友链
+title: "[友链申请] "
+labels: ["friend-link"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本站是纯静态站，没有后端接收表单，所以友链申请走 GitHub Issue。
+        填完点下边的提交即可，我看到后会处理。
+  - type: input
+    id: nickname
+    attributes:
+      label: 昵称
+      description: 怎么称呼您
+      placeholder: 例如：阿岚
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 网站地址
+      description: 请带上 http:// 或 https://
+      placeholder: https://your-site.com
+    validations:
+      required: true
+  - type: textarea
+    id: desc
+    attributes:
+      label: 网站描述
+      description: 一句话介绍您的站点（可留空）
+      placeholder: 一个关于读书与夜行的小站
+    validations:
+      required: false

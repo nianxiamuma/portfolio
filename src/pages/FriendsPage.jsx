@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ArrowUpRight, Check, Link2, Send } from 'lucide-react'
+import { ArrowUpRight, Check, Link2, Send, X } from 'lucide-react'
 import { FRIENDS } from '../data/friends'
+import { buildFriendIssueUrl, validateFriendForm } from '../lib/friendLink'
 
 /** 站点名首字头像：按品牌色生成渐变底，不使用任何外部图片 */
 function InitialAvatar({ name, accent }) {
@@ -17,17 +18,30 @@ function InitialAvatar({ name, accent }) {
 
 export default function FriendsPage() {
   const [form, setForm] = useState({ nickname: '', url: '', desc: '' })
-  const [submitted, setSubmitted] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [opened, setOpened] = useState(false)
 
   const update = (key) => (e) => {
-    setSubmitted(false)
+    setErrors({})
+    setOpened(false)
     setForm((prev) => ({ ...prev, [key]: e.target.value }))
   }
 
-  // 纯前端：仅做本地提示，不发起任何请求
+  /**
+   * 本站是纯静态托管，没有后端接表单 —— 所以不假装提交成功，
+   * 而是打开预填好的 GitHub Issue 新建页：用户点一下，申请就真的发出去了。
+   * （旧实现只 setSubmitted(true)：界面说「已收到」，实际什么都没发生。）
+   */
   const onSubmit = (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    const result = validateFriendForm(form)
+    setErrors(result.errors)
+    if (!result.ok) {
+      setOpened(false)
+      return
+    }
+    window.open(buildFriendIssueUrl(form), '_blank', 'noopener,noreferrer')
+    setOpened(true)
   }
 
   return (
@@ -106,7 +120,8 @@ export default function FriendsPage() {
               <h3 className="text-lg font-semibold text-white">申请友链</h3>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">
-              留下你的站点信息，我看到后会把合适的挂上去。
+              留下你的站点信息，我看到后会把合适的挂上去。提交会打开 GitHub Issue 页面 ——
+              本站是纯静态托管、没有后端收表单，这是它唯一真正能提交出去的路径。
             </p>
 
             <div className="mt-7 flex flex-col gap-5">
@@ -119,8 +134,14 @@ export default function FriendsPage() {
                   value={form.nickname}
                   onChange={update('nickname')}
                   placeholder="怎么称呼你"
+                  aria-invalid={Boolean(errors.nickname)}
                   className="w-full rounded-xl border border-white/[0.08] bg-void-950/80 px-4 py-3 text-sm text-white placeholder:text-slate-600 transition-colors duration-300 focus:border-neon-lime/50"
                 />
+                {errors.nickname ? (
+                  <span className="font-mono text-[10px] tracking-[0.1em] text-neon-pink">
+                    {errors.nickname}
+                  </span>
+                ) : null}
               </label>
 
               <label className="flex flex-col gap-2">
@@ -132,8 +153,14 @@ export default function FriendsPage() {
                   value={form.url}
                   onChange={update('url')}
                   placeholder="https://your-site.com"
+                  aria-invalid={Boolean(errors.url)}
                   className="w-full rounded-xl border border-white/[0.08] bg-void-950/80 px-4 py-3 text-sm text-white placeholder:text-slate-600 transition-colors duration-300 focus:border-neon-lime/50"
                 />
+                {errors.url ? (
+                  <span className="font-mono text-[10px] tracking-[0.1em] text-neon-pink">
+                    {errors.url}
+                  </span>
+                ) : null}
               </label>
 
               <label className="flex flex-col gap-2">
@@ -159,13 +186,20 @@ export default function FriendsPage() {
                 提交申请
               </button>
 
-              {submitted && (
+              {opened && (
                 <span
                   role="status"
                   className="inline-flex items-center gap-2 text-xs text-neon-mint"
                 >
                   <Check className="h-3.5 w-3.5" />
-                  已收到你的申请，感谢～
+                  已打开 GitHub 申请页，在那里点提交即可
+                </span>
+              )}
+
+              {Object.keys(errors).length > 0 && (
+                <span role="alert" className="inline-flex items-center gap-2 text-xs text-neon-pink">
+                  <X className="h-3.5 w-3.5" />
+                  先修一下上面标出来的字段
                 </span>
               )}
             </div>
