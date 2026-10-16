@@ -43,15 +43,19 @@ export default function HeroProfileCard({ className = '' }) {
 
       {/* 快捷入口 */}
       <div className="flex flex-wrap justify-center gap-2">
-        {SITE.shortcuts.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[11px] text-white/80 transition-all duration-500 ease-expo-out hover:border-neon-lime/50 hover:bg-white/[0.12] hover:text-neon-lime"
-          >
-            {item.label}
-          </Link>
-        ))}
+        {SITE.shortcuts.map((item) => {
+          const cls =
+            'rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 text-[11px] text-white/80 transition-all duration-500 ease-expo-out hover:border-neon-lime/50 hover:bg-white/[0.12] hover:text-neon-lime'
+          return item.external ? (
+            <a key={item.to} href={item.to} className={cls}>
+              {item.label}
+            </a>
+          ) : (
+            <Link key={item.to} to={item.to} className={cls}>
+              {item.label}
+            </Link>
+          )
+        })}
       </div>
 
       {/* 社交 */}

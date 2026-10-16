@@ -43,6 +43,28 @@ jobs:
       - name: 检查 404 兜底是否生成（SPA 刷新依赖它）
         run: test -f dist/404.html
 
+      # ── 博客子站（blog/ 目录，Astro + Firefly）──
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: 安装博客依赖
+        working-directory: blog
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 构建博客
+        working-directory: blog
+        env:
+          # 与主站同源：/<repo>/blog/
+          BLOG_BASE: /${{ github.event.repository.name }}/blog
+        run: pnpm build
+
+      - name: 博客产物并入主站 dist/blog
+        run: |
+          test -d blog/dist
+          mkdir -p dist/blog
+          cp -r blog/dist/. dist/blog/
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

@@ -8,7 +8,8 @@ import { MUSIC_TRACKS, musicAvailable, trackSrc } from '../data/music'
 
 const NAV_LINKS = [
   { label: 'Home', to: '/', end: true },
-  { label: '文章', to: '/blog' },
+  // 博客已迁到同仓 blog/ 子站的 Astro Firefly，走外部链接
+  { label: '文章', to: `${import.meta.env.BASE_URL}blog/`, external: true },
   { label: '关于我', to: '/about' },
   { label: '神谕', to: '/glimmer' },
   { label: '来源', to: '/sources' },
@@ -144,15 +145,21 @@ export default function Navbar() {
           {/* 右：导航 + 音乐 + 汉堡 */}
           <div className="flex min-w-0 items-center gap-3 md:gap-6">
             <div className="hidden items-center gap-6 md:flex">
-              {NAV_LINKS.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`nav-hover-btn ${isActive(item) ? 'text-white' : ''}`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((item) =>
+                item.external ? (
+                  <a key={item.to} href={item.to} className="nav-hover-btn">
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`nav-hover-btn ${isActive(item) ? 'text-white' : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                ),
+              )}
             </div>
 
             {HAS_MUSIC && musicReady ? (
@@ -217,17 +224,27 @@ export default function Navbar() {
           </div>
 
           <nav className="mt-8 flex flex-col">
-            {NAV_LINKS.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`border-b border-white/[0.06] py-4 text-sm transition-colors duration-300 ${
-                  isActive(item) ? 'text-neon-lime' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((item) =>
+              item.external ? (
+                <a
+                  key={item.to}
+                  href={item.to}
+                  className="border-b border-white/[0.06] py-4 text-sm text-slate-300 transition-colors duration-300 hover:text-white"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`border-b border-white/[0.06] py-4 text-sm transition-colors duration-300 ${
+                    isActive(item) ? 'text-neon-lime' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <Link
               to="/guestbook"
               className="border-b border-white/[0.06] py-4 text-sm text-slate-300 transition-colors duration-300 hover:text-white"

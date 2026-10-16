@@ -17,7 +17,7 @@ const SOCIAL = [
 ]
 
 const SITEMAP = [
-  { label: '文章', to: '/blog' },
+  { label: '文章', to: `${import.meta.env.BASE_URL}blog/`, external: true },
   { label: '归档', to: '/archive' },
   { label: '标签', to: '/tags' },
   { label: '关于我', to: '/about' },
@@ -86,16 +86,27 @@ export default function Footer() {
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-600">站点</p>
             <ul className="mt-4 space-y-2.5">
-              {SITEMAP.map((item) => (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    className="text-sm text-slate-400 transition-colors duration-300 hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {SITEMAP.map((item) =>
+                item.external ? (
+                  <li key={item.to}>
+                    <a
+                      href={item.to}
+                      className="text-sm text-slate-400 transition-colors duration-300 hover:text-white"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ) : (
+                  <li key={item.to}>
+                    <Link
+                      to={item.to}
+                      className="text-sm text-slate-400 transition-colors duration-300 hover:text-white"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ),
+              )}
             </ul>
           </div>
 
