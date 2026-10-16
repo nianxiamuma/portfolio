@@ -15,28 +15,19 @@ export const SLOT_PRIZES = [
     max: 332,
     key: 'collection',
     label: '藏书',
-    to: '/collection',
+    to: '/about',
     accent: '#edff66',
     desc: '去书架把书抽出来看看',
   },
   {
-    max: 665,
+    max: MAX_NUMBER,
     key: 'games',
     label: '游戏',
-    to: '/collection?tab=games',
+    to: '/about#games',
     accent: '#7c5cff',
     desc: '开一局，或者只是看看',
   },
-  {
-    max: MAX_NUMBER,
-    key: 'friends',
-    label: '友链',
-    to: '/friends',
-    accent: '#4fb7dd',
-    desc: '去别的地方逛逛也不错',
-  },
 ]
-
 const clamp = (n) => Math.max(0, Math.min(MAX_NUMBER, Math.floor(n)))
 
 /** 号码落在哪一档 */

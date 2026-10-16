@@ -3,6 +3,8 @@ import { ArrowUpRight, Check, Copy, Github, Mail } from 'lucide-react'
 
 import { PROJECTS, SKILLS } from '../data/projects'
 import { SITE } from '../data/site'
+import Bookshelf from '../components/Bookshelf'
+import GameShowcase from '../components/GameShowcase'
 
 const EMAIL = '807273679@qq.com'
 
@@ -163,6 +165,10 @@ export default function AboutSitePage() {
           </div>
         </div>
       </section>
+
+      {/* 藏书与游戏（原独立「藏书」页并入，见 Wave A #6） */}
+      <Bookshelf />
+      <GameShowcase />
 
       {/* 技能 */}
       <section className="relative py-24 lg:py-32">

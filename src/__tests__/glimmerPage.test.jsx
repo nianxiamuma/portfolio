@@ -1,5 +1,5 @@
 /**
- * 「浮光集」页面回归测试。
+ * 「神谕」页面回归测试。
  *
  * 覆盖：数据自洽、无外部图片（硬约束）、相册展开/收起、碎语年份与分类筛选。
  * 注：本文件最初是临时探针（文件名前缀 _probe_ 由此而来）；无头 worker 里
@@ -29,7 +29,7 @@ const albumCard = (title) =>
 
 const clickButton = (name) => fireEvent.click(screen.getByRole('button', { name }))
 
-describe('浮光集 · 数据', () => {
+describe('神谕 · 数据', () => {
   it('4 册 / 19 张 / 8 条碎语', () => {
     expect(GLIMMER_ALBUMS).toHaveLength(4)
     expect(GLIMMER_STATS.albumCount).toBe(4)
@@ -47,7 +47,7 @@ describe('浮光集 · 数据', () => {
   })
 })
 
-describe('浮光集 · 页面', () => {
+describe('神谕 · 页面', () => {
   it('两个板块都在，且不引用任何外部图片', () => {
     const { container } = renderPage()
     expect(screen.getByText('相册集')).toBeTruthy()

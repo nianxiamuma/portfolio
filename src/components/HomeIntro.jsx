@@ -40,10 +40,33 @@ const preloadPhoto = (src, onDone) => {
 /**
  * 照片双开门开屏：一整张照片从中间分开，滑出露出首页。
  * - 进度 = min(时间节奏, 照片就绪度)：照片没到门不开，但 3.5s 封顶，弱网不卡死
- * - 同一会话只播一次；prefers-reduced-motion 直接跳过
+ * - 每天最多播一次（跨会话生效）；URL 带 ?intro 强制播放；prefers-reduced-motion 直接跳过
  */
+const introSeenToday = () => {
+  try {
+    return localStorage.getItem('introSeenDate') === new Date().toDateString()
+  } catch {
+    return false
+  }
+}
+const markIntroSeen = () => {
+  try {
+    localStorage.setItem('introSeenDate', new Date().toDateString())
+  } catch {
+    /* 隐私模式下写入失败，忽略 */
+  }
+}
+
 export default function HomeIntro() {
-  const [phase, setPhase] = useState('run') // run | open | done
+  const [phase, setPhase] = useState(() => {
+    // ?intro 旁路：强制播放，方便预览调试
+    try {
+      if (new URLSearchParams(window.location.search).has('intro')) return 'run'
+    } catch {
+      /* ignore */
+    }
+    return introSeenToday() ? 'done' : 'run'
+  }) // run | open | done
   const [progress, setProgress] = useState(0)
   const [photoReady, setPhotoReady] = useState(false)
 
@@ -52,24 +75,20 @@ export default function HomeIntro() {
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // 同一次会话只看一次开场，刷新不再重复遮挡
-    let seen = false
-    try {
-      seen = sessionStorage.getItem('introSeen') === '1'
-    } catch {
-      seen = false
-    }
+    const forced = (() => {
+      try {
+        return new URLSearchParams(window.location.search).has('intro')
+      } catch {
+        return false
+      }
+    })()
 
-    if (reduce || seen) {
+    if (reduce || (introSeenToday() && !forced)) {
       setPhase('done')
       return undefined
     }
 
-    try {
-      sessionStorage.setItem('introSeen', '1')
-    } catch {
-      /* 隐私模式下写入失败，忽略 */
-    }
+    markIntroSeen()
 
     let raf = 0
     let openTimer = 0

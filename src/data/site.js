@@ -14,9 +14,7 @@ export const SITE = {
   /** Hero 名片卡上的快捷入口 */
   shortcuts: [
     { label: '文章', to: '/blog' },
-    { label: '浮光集', to: '/glimmer' },
-    { label: '藏书', to: '/collection' },
-    { label: '友链', to: '/friends' },
+    { label: '神谕', to: '/glimmer' },
     { label: '留言板', to: '/guestbook' },
   ],
   /** 名片卡底部的社交按钮 */

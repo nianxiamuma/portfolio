@@ -10,9 +10,7 @@ const NAV_LINKS = [
   { label: 'Home', to: '/', end: true },
   { label: '文章', to: '/blog' },
   { label: '关于我', to: '/about' },
-  { label: '浮光集', to: '/glimmer' },
-  { label: '藏书', to: '/collection' },
-  { label: '友链', to: '/friends' },
+  { label: '神谕', to: '/glimmer' },
   { label: '来源', to: '/sources' },
 ]
 

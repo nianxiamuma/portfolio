@@ -62,8 +62,6 @@ export const ROUTE_SCENES = {
   '/': 'home-hero',
   '/about': 'about',
   '/glimmer': 'glimmer',
-  '/collection': 'collection',
-  '/friends': 'friends',
   '/guestbook': 'guestbook',
   '/blog': 'blog',
 }

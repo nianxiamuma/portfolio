@@ -30,7 +30,7 @@ describe('Segments 片段叙事段', () => {
   it('有路由的片段是 Link 且 to 正确（单源数据断言）', () => {
     renderSegments()
     expect(screen.getByTestId('segment-01').getAttribute('href')).toBe('/')
-    expect(screen.getByTestId('segment-02').getAttribute('href')).toBe('/collection')
+    expect(screen.getByTestId('segment-02').getAttribute('href')).toBe('/about')
     expect(screen.getByTestId('segment-03').getAttribute('href')).toBe('/glimmer')
   })
 
@@ -55,7 +55,7 @@ describe('Segments 片段叙事段', () => {
   it('文字卡标题渲染', () => {
     renderSegments()
     expect(screen.getByText('藏书与游戏')).toBeTruthy()
-    expect(screen.getByText('浮光集')).toBeTruthy()
+    expect(screen.getByText('神谕')).toBeTruthy()
     expect(screen.getByText('这个站的门面')).toBeTruthy()
   })
 })

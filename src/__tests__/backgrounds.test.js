@@ -23,8 +23,8 @@ describe('resolveScene', () => {
   it('每个顶部路由都能解析到自己的场景', () => {
     expect(resolveScene('/about')).toBe('about')
     expect(resolveScene('/glimmer')).toBe('glimmer')
-    expect(resolveScene('/collection')).toBe('collection')
-    expect(resolveScene('/friends')).toBe('friends')
+    expect(resolveScene('/collection')).toBe(DEFAULT_SCENE) // 页面已删，回落默认
+    expect(resolveScene('/friends')).toBe(DEFAULT_SCENE) // 页面已删，回落默认
     expect(resolveScene('/guestbook')).toBe('guestbook')
     expect(resolveScene('/blog')).toBe('blog')
   })
@@ -36,7 +36,7 @@ describe('resolveScene', () => {
 
   it('忽略查询串与 hash', () => {
     expect(resolveScene('/about?from=nav')).toBe('about')
-    expect(resolveScene('/collection#shelf')).toBe('collection')
+    expect(resolveScene('/collection#shelf')).toBe(DEFAULT_SCENE) // 页面已删，回落默认
   })
 
   it('未知路由回落到默认场景', () => {
