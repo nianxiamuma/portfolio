@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { label: '浮光集', to: '/glimmer' },
   { label: '藏书', to: '/collection' },
   { label: '友链', to: '/friends' },
+  { label: '来源', to: '/sources' },
 ]
 
 /**

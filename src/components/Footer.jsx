@@ -18,11 +18,14 @@ const SOCIAL = [
 
 const SITEMAP = [
   { label: '文章', to: '/blog' },
+  { label: '归档', to: '/archive' },
+  { label: '标签', to: '/tags' },
   { label: '关于我', to: '/about' },
   { label: '浮光集', to: '/glimmer' },
   { label: '藏书与游戏', to: '/collection' },
   { label: '友链', to: '/friends' },
   { label: '留言板', to: '/guestbook' },
+  { label: '来源与致谢', to: '/sources' },
 ]
 
 export default function Footer() {

@@ -16,6 +16,9 @@ import FriendsPage from './pages/FriendsPage'
 import GuestbookPage from './pages/GuestbookPage'
 import BlogPage from './pages/BlogPage'
 import PostPage from './pages/PostPage'
+import SourcesPage from './pages/SourcesPage'
+import ArchivePage from './pages/ArchivePage'
+import TagsPage, { TagPage } from './pages/TagsPage'
 
 export default function App() {
   return (
@@ -30,6 +33,10 @@ export default function App() {
           <Route path="guestbook" element={<GuestbookPage />} />
           <Route path="blog" element={<BlogPage />} />
           <Route path="blog/:slug" element={<PostPage />} />
+          <Route path="archive" element={<ArchivePage />} />
+          <Route path="tags" element={<TagsPage />} />
+          <Route path="tags/:tag" element={<TagPage />} />
+          <Route path="sources" element={<SourcesPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
