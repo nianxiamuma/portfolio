@@ -28,6 +28,12 @@ export default function BlogPage() {
           </h1>
           <p className="mt-5 max-w-xl text-sm leading-relaxed text-slate-500">
             建站记录、书单、零散想法。没有固定更新频率。
+            <Link to="/archive" className="ml-2 font-mono text-[11px] text-neon-lime/80 transition-colors hover:text-neon-lime">
+              按年份看 →
+            </Link>
+            <Link to="/tags" className="ml-2 font-mono text-[11px] text-neon-lime/80 transition-colors hover:text-neon-lime">
+              按标签看 →
+            </Link>
           </p>
         </header>
 

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import BackgroundStage from '../components/BackgroundStage'
+import SearchPanel from '../components/SearchPanel'
 import { BackgroundProvider } from '../context/BackgroundContext'
 
 /**
@@ -28,6 +29,7 @@ export default function SiteLayout() {
           <Outlet />
         </main>
         <Footer />
+        <SearchPanel />
       </div>
     </BackgroundProvider>
   )
