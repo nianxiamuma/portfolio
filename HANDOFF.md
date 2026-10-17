@@ -1,13 +1,13 @@
 # 交接说明
 
 > 写给下一个接手的人（或未来的自己）。假设你**完全不了解**这里发生过什么。
-> 最后更新：**2026-10-16**（上一版 2026-10-13）
+> 最后更新：**2026-10-18**（上一版 2026-10-16）
 
 ---
 
 ## 〇、新会话从这里开始（30 秒上手）
 
-**这个仓库现在的状态**（2026-10-18 02:50 更新）：`main` 与 `origin/main` 同步，工作区有一批**未提交**改动（见下面「本轮改动」），改动验证过：主站 `vitest` 139 项全绿、`vite build` 绿、博客 `astro build` 23 页绿、首页/归档/关于三页已截图核对。
+**这个仓库现在的状态**（2026-10-18 04:10 更新）：工作区**干净**，`main` **领先 `origin/main` 7 个提交**（等用户拍板 push，见下面「挂着等用户拍板的事」）。最新一批是视觉改版（12 个月立绘 / 首屏 5:5 分栏 / 开场两扇门 / About 米白大字），复核状态：主站 `vitest` **139 项全绿**、`vite build` **绿**（1929 modules，8.15s）、首页/About/开场三张截图已核对（`.rivet/scratch/选图/`）。
 
 **本轮改动（2026-10-18，去模板化收尾）**：
 
@@ -21,7 +21,17 @@
 | `blog/src/pages/rss.xml.ts`、`blog/src/utils/feed-utils.ts` | RSS/Atom 的 channel link 与 `rel="self"` 原本掉到根域（`https://nianxiamuma.github.io/`），补上 `/portfolio/blog` base 前缀 |
 | `blog/astro.config.mjs` | sitemap 过滤逻辑拿不含 base 的 `/gallery/` 去比含 base 的 pathname，永远不匹配 → 关掉的页面照样进 sitemap。改为先剥 base 再判断；补上模板漏掉的 `/projects/` 一条 |
 
-**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）；博客去模板化没有单独的计划文件，改动依据都在本段与 git log 里。
+**本轮改动（2026-10-18 03:34–03:59，视觉改版）**：5 个提交
+
+| 提交 | 改了什么 |
+| --- | --- |
+| `3f85f8d` | 12 张月度立绘落到 `public/portraits/m1–m12.png`（1 月宫野志保 → 12 月薇尔莉特，人设词见 `src/lib/wallpapers.js` 的 `MONTH_COVERS[].character/style`）；首屏背景从 oracle 壁纸池（本身是角色特写，和立绘撞车）换成 `wallpapers/scene/` 的场景图 |
+| `8fcd747` | 首屏改 **5:5 分栏**：主文案收进左半屏（`md:w-1/2`）、立绘移到 `left-74%`、名片卡移到左上；`MONTH_BG` 换成 22 张 scene 里 10 张纯风景图按季排列（后两月循环）；12 月方案 overlay 0.6 → 0.78 |
+| `c4d1f83` | 立绘落地：脚部出画 + 底部 mask 82%→98% 渐隐 + 地面 radial 投影（`z-37`，在立绘之下）；左栏补「神无月 · 上杉绘梨衣」行（`MONTH_COVERS` 新增 `character` 字段） |
+| `e647946` | 开场重做：底层是一幅完整的画（场景 + 当月立绘），**两扇独立深色门**从两侧滑开（上一版把照片切两半，人物被从中间剖开）；去掉 localStorage「每天一次」限制，**每次进入都播**；`?nointro` 跳过、`?introopen` 冻结在开门态（headless 截图用，rAF 在 headless 下不推进） |
+| `6374077` | About 第二段换米白大字 + 大圆角插画卡：整段 `#f2efe6`、主视觉换铃芽之旅的门（4K，来自 Steam 创意工坊壁纸 `2953775561` 的 `scene.pkg`，RePKG 解包出前景 `suzume-gate.jpg` 与背景 `suzume-gate-back.jpg` 两层），pin + scrub 从 `scale 0.64` 放大到全屏 |
+
+**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）；博客去模板化与 03:34–03:59 的视觉改版都没有单独的计划文件，依据在提交 body 与 `.rivet/scratch/选图/` 的截图里（`首屏-5比5.png`、`首屏-修完.png`、`开场-门关.png`、`开场-门开.png`、`about-new.png`、`about-2/3.png`）。
 
 **二期新增（2026-10-16，对标参照站补完成度）**：
 - **站点小部件**（Hero 底部）：时钟/问候语/时光进度条/今日一句 —— `src/lib/timeParts.js`、`src/lib/dailySlip.js`（按日期哈希从 52 条纸条库取当日一句，不引外部 API）、`src/components/SiteWidgets.jsx`。interval 在 `document.hidden` 时暂停（fps 纪律）。
@@ -32,15 +42,19 @@
 **性能定位修正（2026-10-16，fps-probe 实测）**：冷/热差异可忽略（avg 28.69 vs 28.37ms），「冷启动尖峰」假设证伪；掉帧真源是**常驻 CSS 动画**——`RIVET_KILL=anim` 后 avg 17.09ms、over33ms 6 次 vs 基线 59 次。若要做性能优化，方向是动画减量/降频（需用户拍板取舍，未动）。
 
 **挂着等用户拍板的事**（不要自行执行）：
-1. `git push origin main` —— 对外发布（本轮改动提交后由用户决定时机）
+1. `git push origin main` —— **本地已积压 7 个提交**（`d71f345` 到 `6374077`），push 即触发 GitHub Actions 部署上线；时机由用户定
 2. 博客内容：`blog/src/content/posts/` 目前只有 1 篇开篇文章，写什么由用户决定；主站旧文章（含 2 篇代笔草稿）随旧博客系统一起删了，没有迁移
+3. **孤儿资产** `public/wallpapers/suzume-gate-back.jpg`：与门同一批解包出来的背景层，当前**无任何代码引用**（About 只用前景 `suzume-gate.jpg`）。要么用起来（About 卡片缩小时露出的边缘/其他段落），要么删——删除不可逆，等用户点头
+4. **死代码** `src/components/NovelReader.jsx`、`src/components/ParticleBackground.jsx`、`public/novel-manifest.json`：已无引用（`novel.txt` 因版权 gitignore），是否清理等用户点头
 
-**环境上的三个坑**（会浪费时间，先知道）：
+**环境上的五个坑**（会浪费时间，先知道）：
 - **dev server 会自己挂**（跑着跑着进程没了，`curl` 返回 `http=000`）。重启即可：`node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173`（本机 `npm run` 被劫持，必须直接调入口）
 - **plan mode 下 `bash` 与 `git_scout` 都被拦**，只有 read/grep/glob/web_fetch/run_tests/delegate/todo/plan 可用
 - **委派的只读 worker 不能联网**（`web_fetch`/`web_search` 在其上下文被审批门拦死）。外部调研必须主会话自己做
+- **`read_file` 在本环境读不了 png**（返回 `File is binary (.png format)`，不给视觉附件），`ui_preview` 也报 `Chrome/Chromium not found`（它只查标准安装路径）。本机 Chrome 实际在 `C:\Users\80727\AppData\Local\Google\Chrome\Application\chrome.exe`——视觉核验走 `.rivet/scratch/shot.mjs`（CDP 截图存盘）或改用几何/资源探针（`elementFromPoint` + `getBoundingClientRect` + `img.naturalWidth`），后者才是可断言的证据
+- **headless 下 rAF / 动画不按墙钟推进**：截图前要么用 `?nointro` / `?introopen` 这类冻结参数，要么探针里手动 `Runtime.evaluate` 推进状态，否则只能拍到动画第 0 帧
 
-**验证探针都在 `.rivet/scratch/`**（会话工作区，不在仓库里）：`fps-probe.mjs` 帧率、`scene-probe.mjs` 背景分段、`friend-probe.mjs` 友链提交、`oracle-probe.mjs` 抽奖机、`hit-probe.mjs` 点击命中、`shot-click.mjs` 交互截图。它们都用同一套 CDP 连本机 Chromium（路径见文件头注释）。
+**验证探针都在 `.rivet/scratch/`**（会话工作区，不在仓库里）：`shot.mjs` 截图（`node shot.mjs <url> <out.png> [--wait ms] [--scroll sel] [--click sel] [--w/--h]`，真实等待、动画能播完）、`fps-probe.mjs` 帧率、`scene-probe.mjs` 背景分段、`friend-probe.mjs` 友链提交、`oracle-probe.mjs` 抽奖机、`hit-probe.mjs` 点击命中、`shot-click.mjs` 交互截图。它们都用同一套 CDP 连本机 Chromium（路径见文件头注释）。
 
 ---
 
@@ -168,7 +182,7 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 ### 需要用户拍板
 
 1. ~~**删除死代码** `src/lib/slotMachine.js` + `src/__tests__/slotMachine.test.js`~~ ✅ 已删（连同旧博客的 posts.js / postOutline / searchIndex / SearchPanel 与四个文章页）
-2. **push**（本轮改动提交后仍需用户点头）
+2. **push**（本地积压 7 个提交，`main` 领先 `origin/main`，push 即上线，仍需用户点头）
 3. **6 个项目卡的真实地址**：`src/data/projects.js` 里 6 条 `url` 全是裸 `https://github.com/`，点进去等于没去。真实地址只有作者知道，不要替他编
 4. **仓库体积**：`public/wallpapers` 已 88MB，要不要砍
 
