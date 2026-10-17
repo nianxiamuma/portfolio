@@ -7,7 +7,7 @@
 
 ## 〇、新会话从这里开始（30 秒上手）
 
-**这个仓库现在的状态**（2026-10-18 04:35 更新）：工作区**干净**，`main` **领先 `origin/main` 10 个提交**（等用户拍板 push，见下面「挂着等用户拍板的事」）。最新一批是视觉改版（12 个月立绘 / 首屏 5:5 分栏 / **真正的铃芽之门开场** / About 米白大字），复核状态：主站 `vitest` **146 项全绿**（17 文件：基线 139 + 开场新增 7）、`vite build` **绿**（1929 modules，6.63s）、开场门关/门开两态 CDP 实测截图在 `.rivet/scratch/选图/door-closed.png`、`door-open.png`。
+**这个仓库现在的状态**（2026-10-18 04:45 更新）：工作区**干净**，`main` **领先 `origin/main` 12 个提交**（等用户拍板 push，见下面「挂着等用户拍板的事」）。最新一批是视觉改版（12 个月立绘 / 首屏 5:5 分栏 / **真正的铃芽之门开场** / About 米白大字）+ **新增站点索引卡片墙 `/home`**，复核状态：主站 `vitest` **153 项全绿**（18 文件：基线 139 + 开场 7 + 索引 7）、`vite build` **绿**、开场门关/门开两态与索引页点击实测截图在 `.rivet/scratch/选图/`（`door-closed.png`、`door-open.png`、`cards-home.png`）。
 
 **本轮改动（2026-10-18，去模板化收尾）**：
 
@@ -60,8 +60,9 @@
 **挂着等用户拍板的事**（不要自行执行）：
 1. `git push origin main` —— **本地已积压 9 个提交**（`d71f345` 到 `30801c2`），push 即触发 GitHub Actions 部署上线；时机由用户定
 2. 博客内容：`blog/src/content/posts/` 目前只有 1 篇开篇文章，写什么由用户决定；主站旧文章（含 2 篇代笔草稿）随旧博客系统一起删了，没有迁移
-3. **孤儿资产** `public/wallpapers/suzume-gate-back.jpg`：与门同一批解包出来的背景层，当前**无任何代码引用**（About 只用前景 `suzume-gate.jpg`）。要么用起来（About 卡片缩小时露出的边缘/其他段落），要么删——删除不可逆，等用户点头
-4. **死代码** `src/components/NovelReader.jsx`、`src/components/ParticleBackground.jsx`、`public/novel-manifest.json`：已无引用（`novel.txt` 因版权 gitignore），是否清理等用户点头
+3. ~~**孤儿资产** `public/wallpapers/suzume-gate-back.jpg`~~ ✅ 已删（`2bbcdaa`，全仓零引用已核验）
+4. ~~**死代码** `NovelReader.jsx` / `ParticleBackground.jsx` / `novel-manifest.json`~~ ✅ 已删（`2bbcdaa`，只有自身定义、无任何 import）
+5. **新增页面 `/home`（站点索引卡片墙，`ef25a09`）**：`src\pages\HomeCardsPage.jsx` + 数据单源 `src\data\indexCards.js`（三组九卡）。首页片段卡用 `/?nointro#xxx` 跳过开场，`src\pages\HomePage.jsx` 补了 hash 滚动 effect。同时修掉 `Story.jsx:89` 的 `/collection` 死链（页面早删了，改指 `/about`）。CDP 实测：点「AI 工具箱」→ `path=/ search=?nointro hash=#features scrollY=2880 featuresTop=0`、开场层未出现
 
 **环境上的五个坑**（会浪费时间，先知道）：
 - **dev server 会自己挂**（跑着跑着进程没了，`curl` 返回 `http=000`）。重启即可：`node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173`（本机 `npm run` 被劫持，必须直接调入口）
