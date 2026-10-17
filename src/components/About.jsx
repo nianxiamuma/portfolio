@@ -12,9 +12,18 @@ const FACTS = [
   { icon: Mail, k: '邮箱', v: '807273679@qq.com' },
 ]
 
+/** 部署基路径；字符串资源路径必须手动拼，Vite 不会改写字符串 */
+const BASE = import.meta.env.BASE_URL
+
 /**
- * 明信片式滚动展开：一张圆角小窗卡片，随着滚动被补间到全屏
- * （pin + scrub），装饰层同步淡出、主视觉轻微缩放。
+ * 第二段：浅色大字 + 大圆角插画卡（对标桃之夭夭那一段的版式）。
+ *
+ * 与上一版的差别：整段从暗色换成米白，标题从 3rem 放大到 9vw 的黑体，
+ * 主视觉从线稿 SVG 换成一整张铃芽之旅的门（4K 素材，来自 Steam 创意工坊
+ * 壁纸 2953775561 的 scene.pkg，用 RePKG 解包得到门前图层）。
+ *
+ * 暗色主站里插一整段米白，是有意的断层——用它把「首屏」和「收藏内容」分开。
+ * 滚动时卡片从 0.64 放大到全屏（pin + scrub），和上一版同一套动画，只是换了皮。
  */
 export default function About() {
   const sectionRef = useRef(null)
@@ -38,12 +47,12 @@ export default function About() {
 
       tl.fromTo(
         cardRef.current,
-        { scale: 0.68, borderRadius: 30 },
+        { scale: 0.64, borderRadius: 34 },
         { scale: 1, borderRadius: 0, ease: 'none' },
         0,
       )
         .fromTo(decorRef.current, { opacity: 1 }, { opacity: 0, ease: 'none' }, 0)
-        .fromTo(artRef.current, { scale: 1.08 }, { scale: 1, ease: 'none' }, 0)
+        .fromTo(artRef.current, { scale: 1.1 }, { scale: 1, ease: 'none' }, 0)
     })
 
     return () => mm.revert()
@@ -54,103 +63,78 @@ export default function About() {
       id="about"
       ref={sectionRef}
       data-bg-scene="home-about"
-      className="relative w-full overflow-hidden bg-void-950"
+      className="relative w-full overflow-hidden bg-[#f2efe6] text-[#16181d]"
     >
       <div className="flex h-screen w-full items-center justify-center">
         <div
           ref={cardRef}
-          className="relative h-screen w-full origin-center overflow-hidden border border-white/[0.07] bg-void-900 will-change-transform"
+          className="relative h-screen w-full origin-center overflow-hidden bg-[#efece2] will-change-transform"
         >
-          {/* 视觉主体 */}
+          {/* 主视觉：铃芽之旅的门 */}
           <div ref={artRef} className="absolute inset-0">
-            <div className="absolute inset-0 bg-[linear-gradient(150deg,#101a33_0%,#0a0f1f_48%,#04060d_100%)]" />
-            <div className="absolute -left-1/4 top-0 h-[60vw] w-[60vw] animate-drift-slow rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.3),transparent_62%)] blur-[100px]" />
-            <div className="absolute -right-1/5 bottom-0 h-[52vw] w-[52vw] animate-drift-medium rounded-full bg-[radial-gradient(circle,rgba(237,255,102,0.14),transparent_62%)] blur-[110px]" />
-
-            {/* 极简线稿人像 */}
-            <div className="absolute inset-0 grid place-items-center">
-              <svg viewBox="0 0 200 240" className="h-[62%] w-auto" fill="none" aria-hidden>
-                <defs>
-                  <linearGradient id="about-line" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#edff66" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#7c5cff" stopOpacity="0.35" />
-                  </linearGradient>
-                </defs>
-                <circle
-                  cx="100"
-                  cy="88"
-                  r="64"
-                  stroke="url(#about-line)"
-                  strokeWidth="0.8"
-                  strokeDasharray="2 7"
-                  opacity="0.45"
-                />
-                <circle cx="100" cy="88" r="44" fill="url(#about-line)" fillOpacity="0.05" />
-                <path d="M24 240c0-42 34-76 76-76s76 34 76 76" fill="url(#about-line)" fillOpacity="0.05" />
-                <circle cx="100" cy="88" r="44" stroke="url(#about-line)" strokeWidth="1.2" />
-                <path
-                  d="M24 240c0-42 34-76 76-76s76 34 76 76"
-                  stroke="url(#about-line)"
-                  strokeWidth="1.2"
-                />
-                <path
-                  d="M100 24v14M100 138v14M36 88h14M150 88h14"
-                  stroke="url(#about-line)"
-                  strokeWidth="0.8"
-                  opacity="0.6"
-                />
-              </svg>
-            </div>
-
-            <div className="absolute inset-0 bg-noise opacity-[0.05] mix-blend-overlay" />
-            <div className="absolute inset-0 bg-grid-faint [background-size:64px_64px] opacity-30" />
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-void-950 via-void-950/70 to-transparent" />
+            <img
+              src={`${BASE}wallpapers/suzume-gate.jpg`}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            {/* 上下压一点，保证卡内白字可读 */}
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,22,0.42)_0%,rgba(10,14,22,0.06)_28%,rgba(10,14,22,0.1)_62%,rgba(10,14,22,0.72)_100%)]" />
           </div>
 
-          {/* 装饰框（滚动后淡出） */}
-          <div ref={decorRef} className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-5 rounded-2xl border border-white/[0.06]" />
-            <div className="absolute left-8 top-8 flex items-center gap-3">
-              <span className="h-px w-10 bg-neon-lime/60" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.42em] text-neon-lime/80">
-                About
+          {/* 卡内装饰框 + 段首大字：滚动放大时整层淡出，让卡片独自占满屏幕 */}
+          <div ref={decorRef} className="pointer-events-none absolute inset-0 z-20">
+            <div className="absolute inset-4 rounded-[26px] border border-white/25" />
+            <div className="absolute left-7 top-6 flex items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/85">
+                Welcome to
               </span>
+              <span className="font-mono text-[10px] tracking-[0.2em] text-white/60">年下牧马</span>
             </div>
-            <div className="absolute right-8 top-8 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-slate-400">
-              Est. 2026
+            <div className="absolute right-7 top-6 font-mono text-[10px] uppercase tracking-[0.3em] text-white/70">
+              No. 2026
+            </div>
+            <div className="absolute bottom-6 left-7 font-mono text-[10px] uppercase tracking-[0.4em] text-white/70">
+              Scroll to immerse
+            </div>
+
+            {/* 段首大字：卡片缩小时露在卡片上方，卡片放大时跟着淡出 */}
+            <div className="absolute inset-x-0 top-0 px-6 pt-8 md:pt-12">
+              <div className="mx-auto max-w-shell text-center">
+                <p className="font-mono text-[10px] uppercase tracking-[0.44em] text-[#16181d]/45">
+                  Welcome to · 年下牧马
+                </p>
+                <h2 className="mt-4 text-[clamp(1.8rem,5.6vw,4.8rem)] font-black leading-[0.94] tracking-[-0.03em] text-[#16181d]">
+                  FEEL FREE TO
+                  <br />
+                  KEEP SCROLLING DOWN
+                </h2>
+              </div>
             </div>
           </div>
 
-          {/* 文案 */}
-          <div className="relative flex h-full flex-col justify-end p-8 md:p-14">
-            <h2 className="max-w-3xl text-[clamp(1.6rem,3.6vw,3rem)] font-bold leading-[1.14] tracking-tightest text-white">
-              收藏，是把喜欢的东西
-              <span className="bg-gradient-to-r from-neon-lime to-neon-mint bg-clip-text text-transparent">
-                留在手边
-              </span>
-            </h2>
+          {/* 卡内文案 */}
+          <div className="relative z-10 flex h-full flex-col justify-end p-8 md:p-14">
+            <p className="max-w-2xl text-[clamp(1.1rem,1.8vw,1.5rem)] font-medium leading-[1.5] text-white">
+              这里是我的收藏。书、游戏、写下来的东西，
+              <br className="hidden md:block" />
+              还有这些年在各处捡到的画面。
+            </p>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-end">
-              <p className="max-w-xl text-sm leading-relaxed text-slate-400">
-                不太擅长介绍自己。白天和代码打交道，晚上和小说打交道，中间的空隙留给游戏。
-                这里没有简历，也没有作品集——只是把喜欢的东西摆出来。
-              </p>
-
-              <dl className="divide-y divide-white/[0.07] border-y border-white/[0.07]">
-                {FACTS.map((f) => (
-                  <div key={f.k} className="flex items-center gap-4 py-3">
-                    <f.icon className="h-3.5 w-3.5 shrink-0 text-neon-lime/70" />
-                    <dt className="w-14 shrink-0 font-mono text-[10px] uppercase tracking-[0.24em] text-slate-600">
-                      {f.k}
-                    </dt>
-                    <dd className="truncate text-xs text-slate-300">{f.v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            <dl className="mt-8 grid gap-x-8 gap-y-2 border-t border-white/25 pt-6 sm:grid-cols-3">
+              {FACTS.map((f) => (
+                <div key={f.k} className="flex items-center gap-3">
+                  <f.icon className="h-3.5 w-3.5 shrink-0 text-white/70" />
+                  <dt className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/55">
+                    {f.k}
+                  </dt>
+                  <dd className="truncate text-xs text-white/85">{f.v}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
       </div>
+
     </section>
   )
 }
