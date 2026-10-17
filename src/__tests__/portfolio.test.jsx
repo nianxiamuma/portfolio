@@ -53,5 +53,13 @@ describe('页脚', () => {
     expect(screen.getAllByText('807273679@qq.com').length).toBeGreaterThan(0)
     expect(screen.getByText('关于我')).toBeTruthy()
     expect(screen.getByText('留言板')).toBeTruthy()
+
+    // 回归：旧博客系统下线后，页脚的「归档」「标签」曾仍指向 /archive、/tags，
+    // 而这两条路由已从 App.jsx 删除 —— 点击会命中通配路由被弹回首页。
+    // 锚点必须落在博客子站的静态目录上（blog/ 是 Astro 构建产物，不是 React 路由）。
+    const archiveLink = screen.getByText('归档').closest('a')
+    const tagsLink = screen.getByText('标签').closest('a')
+    expect(archiveLink.getAttribute('href')).toBe('/blog/archive/')
+    expect(tagsLink.getAttribute('href')).toBe('/blog/tags/')
   })
 })
