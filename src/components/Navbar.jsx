@@ -7,9 +7,11 @@ import MusicPlayer from './MusicPlayer'
 import { MUSIC_TRACKS, musicAvailable, trackSrc } from '../data/music'
 
 const NAV_LINKS = [
-  { label: 'Home', to: '/', end: true },
-  { label: '索引', to: '/home' },
-  // 博客已迁到同仓 blog/ 子站的 Astro Firefly，走外部链接（入口文案统一叫「博客」）
+  // 两个并列入口，各自独立：
+  //   主页 = /home 的个人主页卡片墙（imsyy/home 那种卡片墙）
+  //   博客 = 同仓 blog/ 子站的 Astro Firefly（长文都写在那儿）
+  // 落地页 / 由左侧「牧」标记回到，不再单独占一个导航位。
+  { label: '主页', to: '/home' },
   { label: '博客', to: `${import.meta.env.BASE_URL}blog/`, external: true },
   { label: '关于我', to: '/about' },
   { label: '神谕', to: '/glimmer' },

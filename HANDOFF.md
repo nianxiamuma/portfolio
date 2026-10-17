@@ -58,6 +58,10 @@
 
 **文案**：导航 / 页脚 / 索引卡片墙里的「文章」统一改成「博客」（都指向同仓 `blog/` 子站，四个入口 `Navbar.jsx`、`data/site.js`、`Footer.jsx`、`data/indexCards.js`）。
 
+**入口最终形态（10-18 晚）**：导航第一二位并列 `主页`（`/home` 卡片墙，imsyy/home 那种）+ `博客`（`blog/` 子站 Firefly），落地页 `/` 由左上「牧」标记回去，不再单独占导航位；页脚站点地图同步加 `主页`。子站右上角加了 home 图标 → `/portfolio/`，与主站「博客」构成双向切换。
+
+> **Git Bash 会吃掉 `VITE_BASE`**：`VITE_BASE=/portfolio/ npx vite build` 在 MSYS 下会被改写成 `C:/Program Files/Git/portfolio/`，产物里所有链接变成 `/Program%20Files/...`（主站「博客」直接指飞）。本地复现预览必须写成 `MSYS_NO_PATHCONV=1 VITE_BASE=/portfolio/ npx vite build`。CI（Linux）没有这个问题。
+
 **正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）；博客去模板化与 03:34–03:59 的视觉改版都没有单独的计划文件，依据在提交 body 与 `.rivet/scratch/选图/` 的截图里（`首屏-5比5.png`、`首屏-修完.png`、`开场-门关.png`、`开场-门开.png`、`about-new.png`、`about-2/3.png`）。
 
 **二期新增（2026-10-16，对标参照站补完成度）**：

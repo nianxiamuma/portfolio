@@ -22,6 +22,7 @@ const SOCIAL = [
  * 旧版本这里还留着 /archive、/tags 两条主站路由，那两条路由已随旧博客系统一起删除。
  */
 const SITEMAP = [
+  { label: '主页', to: '/home' },
   { label: '博客', to: `${import.meta.env.BASE_URL}blog/`, external: true },
   { label: '归档', to: `${import.meta.env.BASE_URL}blog/archive/`, external: true },
   { label: '标签', to: `${import.meta.env.BASE_URL}blog/tags/`, external: true },
