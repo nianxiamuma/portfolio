@@ -190,8 +190,25 @@ export default function Hero() {
             位置从 left-[6%] 挪到 left-[32%]：原来贴最左边会被底部的 WELCOME 大字压住，
             立绘只剩半条腿露在外面（1440 宽实测）。现在让开左侧文案区，
             右侧还有名片卡（xl:right-14）和右上 wordmark，所以停在 32% 不会再往右撞。 */}
+        {/* 人物脚下的地面投影：没有它，立绘看着像浮在半空。
+            z-37 在立绘（38）之下，是一块横向拉扁的径向渐变。 */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-[4%] left-[74%] z-[37] hidden h-28 w-[30%] -translate-x-1/2 lg:block"
+          style={{
+            background:
+              'radial-gradient(ellipse at 50% 72%, rgba(0,0,0,0.68), rgba(0,0,0,0.3) 45%, transparent 72%)',
+          }}
+        />
+
         {portraitOk && activeCover.portrait ? (
-          <div className="pointer-events-none absolute bottom-0 left-[74%] z-[38] hidden h-[92%] -translate-x-1/2 lg:block [mask-image:linear-gradient(to_bottom,black_86%,transparent_100%)]">
+          <div
+            className="pointer-events-none absolute -bottom-[4%] left-[74%] z-[38] hidden h-[97%] -translate-x-1/2 lg:block"
+            style={{
+              maskImage: 'linear-gradient(to bottom, #000 82%, transparent 98%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, #000 82%, transparent 98%)',
+            }}
+          >
             <img
               src={activeCover.portrait}
               alt=""
@@ -231,6 +248,11 @@ export default function Hero() {
           <div className="flex-1" />
 
           <div>
+            {/* 左栏原本上重下轻：名片卡在顶、标题在底，中间空出一大块。
+                这里用「当月名 · 当月角色」填空，既是留白的交代，也告诉访客当前是谁在站岗。 */}
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.4em] text-neon-lime/70">
+              {activeCover.name} · {activeCover.character}
+            </p>
             <h1 className="text-[clamp(2.2rem,3.8vw,3.4rem)] font-extrabold leading-[1.06] tracking-tight text-white">
               把喜欢的东西
               <br />
