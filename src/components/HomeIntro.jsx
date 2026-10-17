@@ -14,8 +14,8 @@ import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
  */
 const HOLD = 1100 // 进度条走满的时间（ms）
 const OPEN_DELAY = 420 // 走满后停顿再开门
-const SLIDE = 1200 // 两扇门板滑开的时间（ms），与下面 duration-[1200ms] 保持一致
-const EXIT = 2400 // 门滑完 + 停顿后卸载开场层（ms）
+const SLIDE = 1000 // 两扇门板滑开的时间（ms），与下面 duration-[1000ms] 保持一致
+const EXIT = 1900 // 门滑完（约 1.0s）后再停留约 0.9s 才卸载开场层；总时长从 5.3s 压到 ~4.1s
 
 /** 部署基路径；字符串资源路径必须手动拼，Vite 不会改写字符串 */
 const BASE = import.meta.env.BASE_URL
@@ -106,7 +106,7 @@ export default function HomeIntro() {
   if (phase === 'done') return null
 
   const open = phase === 'open'
-  const slide = 'transition-transform duration-[1200ms] ease-expo-in-out'
+  const slide = 'transition-transform duration-[1000ms] ease-expo-in-out'
 
   return createPortal(
     <div className="fixed inset-0 z-[200]" aria-hidden={open}>
@@ -160,7 +160,7 @@ export default function HomeIntro() {
           <img src={ASSET.afterworld} alt="" className="absolute inset-0 h-full w-full object-cover" />
           {/* 常世的光：开门那一刻才亮 */}
           <div
-            className={`absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(208,235,255,0.6),transparent_68%)] transition-opacity duration-[1200ms] ${
+            className={`absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(208,235,255,0.6),transparent_68%)] transition-opacity duration-[1000ms] ${
               open ? 'opacity-100' : 'opacity-0'
             }`}
           />
