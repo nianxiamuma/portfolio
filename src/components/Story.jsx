@@ -86,7 +86,7 @@ export default function Story() {
 
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <Link
-                    to="/collection"
+                    to="/about"
                     className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-semibold text-void-950 transition-all duration-500 ease-expo-out hover:shadow-glow-lime"
                   >
                     去看看藏书与游戏

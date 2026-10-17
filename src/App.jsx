@@ -13,6 +13,7 @@ const BASE_PATH = (import.meta.env.BASE_URL || '/').replace(/\/$/, '') || '/'
 
 import SiteLayout from './layouts/SiteLayout'
 import HomePage from './pages/HomePage'
+import HomeCardsPage from './pages/HomeCardsPage'
 import AboutSitePage from './pages/AboutSitePage'
 import GlimmerPage from './pages/GlimmerPage'
 import GuestbookPage from './pages/GuestbookPage'
@@ -24,6 +25,7 @@ export default function App() {
       <Routes>
         <Route element={<SiteLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="home" element={<HomeCardsPage />} />
           <Route path="about" element={<AboutSitePage />} />
           <Route path="glimmer" element={<GlimmerPage />} />
           <Route path="guestbook" element={<GuestbookPage />} />
