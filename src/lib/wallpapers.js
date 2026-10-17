@@ -192,20 +192,27 @@ export const ALL_COVERS = [...WALLPAPERS, ...EXTRA_COVERS]
 export const getWallpaper = (index) =>
   ALL_COVERS.find((item) => item.index === index) || ALL_COVERS[0]
 
-/** 12 个月的罗盘背景：暂从 oracle 图库按序取 12 张；立绘/主题图到位后逐月替换 */
-const ORACLE_BG = [
-  'wallhaven-216o5y.png',
-  'wallhaven-3zmr6y.jpg',
-  'wallhaven-4dk13n.jpg',
-  'wallhaven-5d1m61.png',
-  'wallhaven-72drx3.jpg',
-  'wallhaven-72pgxv.jpg',
-  'wallhaven-72r8ry.jpg',
-  'wallhaven-8o3m71.jpg',
-  'wallhaven-8o77d1.jpg',
-  'wallhaven-dp7gkm.png',
-  'wallhaven-g8g6re.png',
-  'wallhaven-gp7mq3.jpg',
+/**
+ * 12 个月的背景图。
+ *
+ * 2026-10-18 换血：原来从 oracle 壁纸池取 12 张，那批图里本身就有角色特写，
+ * 和叠在上面的美少女立绘撞成"两个人站在同一屏"，主次分不清。
+ * 现在改用 public/wallpapers/scene/ 下同一套场景摄影图（1920×1080，全站统一调性），
+ * 背景退到后面当氛围，立绘才是主体。
+ */
+const MONTH_BG = [
+  'scene/scene-about.jpg',
+  'scene/scene-about-2.jpg',
+  'scene/scene-blog.jpg',
+  'scene/scene-blog-2.jpg',
+  'scene/scene-collection.jpg',
+  'scene/scene-collection-2.jpg',
+  'scene/scene-fragments.jpg',
+  'scene/scene-fragments-2.jpg',
+  'scene/scene-glimmer.jpg',
+  'scene/scene-glimmer-2.jpg',
+  'scene/scene-friends.jpg',
+  'scene/scene-friends-2.jpg',
 ]
 
 /**
@@ -243,7 +250,7 @@ export const MONTH_COVERS = [
     overlay: 'rgba(6, 10, 20, 0.6)',
   },
   scene: {
-    image: `${BASE}wallpapers/oracle/${ORACLE_BG[i]}`,
+    image: `${BASE}wallpapers/${MONTH_BG[i]}`,
   },
 }))
 

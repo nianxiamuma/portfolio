@@ -186,9 +186,12 @@ export default function Hero() {
 
         <Petals className="z-[36]" />
 
-        {/* 月份美少女立绘：立在主文案左侧，图片缺失时自动隐藏 */}
+        {/* 月份美少女立绘：立在画面中偏左，作为主视觉；图片缺失时自动隐藏。
+            位置从 left-[6%] 挪到 left-[32%]：原来贴最左边会被底部的 WELCOME 大字压住，
+            立绘只剩半条腿露在外面（1440 宽实测）。现在让开左侧文案区，
+            右侧还有名片卡（xl:right-14）和右上 wordmark，所以停在 32% 不会再往右撞。 */}
         {portraitOk && activeCover.portrait ? (
-          <div className="pointer-events-none absolute bottom-0 left-[6%] z-[37] hidden h-[78%] lg:block">
+          <div className="pointer-events-none absolute bottom-0 left-[38%] z-[38] hidden h-[86%] lg:block">
             <img
               src={activeCover.portrait}
               alt=""
@@ -223,7 +226,7 @@ export default function Hero() {
           <div className="flex-1" />
 
           <div>
-            <h1 className="text-[clamp(3.4rem,12vw,11rem)] font-extrabold leading-[0.88] tracking-tightest text-white">
+            <h1 className="text-[clamp(3.2rem,9vw,8rem)] font-extrabold leading-[0.88] tracking-tightest text-white">
               WELCOME
             </h1>
             <p className="mt-4 text-sm font-light text-white/70 md:text-base">
