@@ -13,7 +13,7 @@ export const SITE = {
   email: '807273679@qq.com',
   /** Hero 名片卡上的快捷入口 */
   shortcuts: [
-    { label: '文章', to: `${import.meta.env.BASE_URL}blog/`, external: true },
+    { label: '博客', to: `${import.meta.env.BASE_URL}blog/`, external: true },
     { label: '神谕', to: '/glimmer' },
     { label: '留言板', to: '/guestbook' },
   ],

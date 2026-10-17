@@ -94,7 +94,7 @@ export const INDEX_CARDS = [
     id: 'blog',
     group: 'external',
     icon: 'pen',
-    title: '文章',
+    title: '博客',
     subtitle: 'Blog',
     desc: '独立的 Astro 子站，长文都写在那里',
     href: `${BASE}blog/`,

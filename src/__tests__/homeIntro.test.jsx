@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, act, cleanup } from '@testing-library/react'
-import HomeIntro from '../components/HomeIntro'
+import HomeIntro, { doorHolePx, doorLayerSize } from '../components/HomeIntro'
 
 /**
  * 开场动画（铃芽之门）的回归锁。
@@ -68,10 +68,16 @@ describe('HomeIntro 开场 · 铃芽之门', () => {
     act(() => {
       vi.advanceTimersByTime(2000)
     })
-    // 分两段推进：phase 变 open 后 React 先跑 effect 注册卸载计时器，
-    // 再推进 EXIT；一次推到底的话 effect 还没机会执行
+    // 分三段推进：phase 变 open 后 React 先跑 effect 注册停留计时器，再推进 EXIT；
+    // EXIT 到点变 leaving 后同样要先让 effect 注册 FADE，才会真正卸载
     act(() => {
-      vi.advanceTimersByTime(4000)
+      vi.advanceTimersByTime(2000)
+    })
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+    act(() => {
+      vi.advanceTimersByTime(600)
     })
 
     expect(screen.queryByTestId('intro-doorway')).toBeNull()
@@ -93,6 +99,61 @@ describe('HomeIntro 开场 · 铃芽之门', () => {
       vi.advanceTimersByTime(10000)
     })
     expect(screen.queryByTestId('intro-doorway')).not.toBeNull()
+  })
+
+  it('门滑完停留后先淡出再卸载（不再硬切成首屏）', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 9, 18, 3, 0, 0))
+    render(<HomeIntro />)
+
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+    // EXIT(1900) 到点 → leaving：开场层挂上 opacity-0 开始淡出，但还没卸载
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+    expect(screen.getByTestId('intro-layer').className).toContain('opacity-0')
+    expect(screen.queryByTestId('intro-doorway')).not.toBeNull()
+
+    // FADE(520) 走完才真正卸载
+    act(() => {
+      vi.advanceTimersByTime(600)
+    })
+    expect(screen.queryByTestId('intro-doorway')).toBeNull()
+  })
+
+  it('门洞放大到盖住视口（cover 0.94），不再是一小块', () => {
+    const viewports = [
+      [1440, 900],
+      [1920, 1080],
+      [2560, 1080],
+      [390, 844],
+      [768, 1024],
+    ]
+    for (const [vw, vh] of viewports) {
+      const { width, height } = doorHolePx(vw, vh)
+      // 门洞横竖都要盖住 94% 视口——这是「门比例太小不能覆盖」的回归锁
+      expect(width).toBeGreaterThanOrEqual(vw * 0.94 - 0.5)
+      expect(height).toBeGreaterThanOrEqual(vh * 0.94 - 0.5)
+      // 也不能反过来盖出天际：门的宽高比由素材决定，约 1.11:1
+      expect(width / height).toBeCloseTo(1.111, 2)
+    }
+  })
+
+  it('对齐层的 vw/vh 系数与门洞实测比例一致（CSS 与纯函数同一套几何）', () => {
+    const matched = doorLayerSize().height.match(/^max\(([\d.]+)vw, ([\d.]+)vh\)$/)
+    expect(matched).toBeTruthy()
+    const [, vwCoef, vhCoef] = matched
+    // 门洞宽 = 18.72% × 层宽 = (18.72 × 16/9)% × 层高 = 33.28% × 层高；高 = 29.95% × 层高
+    expect(Number(vwCoef)).toBeCloseTo((94 / 33.28) * 100, 1)
+    expect(Number(vhCoef)).toBeCloseTo((94 / 29.95) * 100, 1)
+
+    // 同一视口下，CSS 系数的像素结果要和纯函数算出的门洞对得上
+    const layerH = Math.max((Number(vwCoef) / 100) * 1440, (Number(vhCoef) / 100) * 900)
+    const hole = doorHolePx(1440, 900)
+    expect(hole.height).toBeCloseTo(layerH * 0.2995, 0)
+    expect(hole.width).toBeCloseTo(layerH * 0.3328, 0)
   })
 
   it('prefers-reduced-motion 下不播动画，直接落到 done', () => {

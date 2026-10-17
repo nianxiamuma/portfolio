@@ -9,8 +9,8 @@ import { MUSIC_TRACKS, musicAvailable, trackSrc } from '../data/music'
 const NAV_LINKS = [
   { label: 'Home', to: '/', end: true },
   { label: '索引', to: '/home' },
-  // 博客已迁到同仓 blog/ 子站的 Astro Firefly，走外部链接
-  { label: '文章', to: `${import.meta.env.BASE_URL}blog/`, external: true },
+  // 博客已迁到同仓 blog/ 子站的 Astro Firefly，走外部链接（入口文案统一叫「博客」）
+  { label: '博客', to: `${import.meta.env.BASE_URL}blog/`, external: true },
   { label: '关于我', to: '/about' },
   { label: '神谕', to: '/glimmer' },
   { label: '来源', to: '/sources' },

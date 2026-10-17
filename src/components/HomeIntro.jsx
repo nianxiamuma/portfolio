@@ -7,7 +7,7 @@ import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
  *
  * 和上一版的区别（2026-10-18 重做）：
  * 1. 上一版是把一张照片切成左右两半各贴一扇门，开门时照片跟着裂开——人物会被从中间剖开。
- *    现在底层是完整的一幅画（场景图 + 当月立绘），门是两扇独立的深色挡板，滑开只是让开视线。
+ *    现在底层是完整的一幅画（场景图 + 当月立绘），门是两扇独立的门板，滑开只是让开视线。
  * 2. 上一版「每天最多播一次」（写 localStorage），用户当天第二次刷新就再也看不到，
  *    表现就是「开场动画没有展示」。现在每次进入都播，`?nointro` 可跳过（调试/截图用）。
  * 3. 素材从本月方案取：场景图 + 立绘与首屏同一个人，开门之后接得上。
@@ -15,13 +15,14 @@ import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
 const HOLD = 1100 // 进度条走满的时间（ms）
 const OPEN_DELAY = 420 // 走满后停顿再开门
 const SLIDE = 1000 // 两扇门板滑开的时间（ms），与下面 duration-[1000ms] 保持一致
-const EXIT = 1900 // 门滑完（约 1.0s）后再停留约 0.9s 才卸载开场层；总时长从 5.3s 压到 ~4.1s
+const EXIT = 1900 // 门滑完（约 1.0s）后再停留约 0.9s 才开始淡出
+const FADE = 520 // 淡出时长（ms），与 duration-500 一致；淡完才卸载开场层
 
 /** 部署基路径；字符串资源路径必须手动拼，Vite 不会改写字符串 */
 const BASE = import.meta.env.BASE_URL
 
 /**
- * 铃芽之门（2026-10-18 第二次重做）：
+ * 铃芽之门（2026-10-18 第二次重做，10-18 晚放大）：
  * 门不再是盖住整屏的深色挡板，而是立在场景里的一扇真门——
  * 门框 + 两扇门板 + 门后的常世，开门时门板向两侧滑开、露出门内的星空。
  *
@@ -35,6 +36,44 @@ const BASE = import.meta.env.BASE_URL
  * 任何视口下都按同一套 cover 裁切，门框、门洞、门板不会错位。
  */
 const DOOR = { left: 40.62, top: 46.53, width: 18.72, height: 29.95 }
+/**
+ * 门洞中心在层里的纵向位置：46.53 + 29.95/2 = 61.5%，不在层的正中间。
+ * 层按 50% 居中的话，放大后门洞会整个偏到屏幕上半部分，所以居中时要多上移这一段。
+ */
+const DOOR_CENTER_Y = DOOR.top + DOOR.height / 2
+
+/**
+ * 门洞要「盖住」视口，对齐层就得放大到门洞宽高都 ≥ 视口（用户反馈：门太小，盖不住屏）。
+ * 门洞宽是层宽的 18.72%，层是 16:9，所以门洞宽 = 18.72% × 层宽 = 33.28% × 层高；
+ * 门洞高是层高的 29.95%。两条约束取大值 → 层高 = max(300.5vw, 333.9vh)。
+ *
+ * COVER < 1 是留边：0.94 时门洞正好 94vw 宽、135vh 高（16:9 视口），
+ * 左右各剩 3% 给门框立柱——门基本铺满屏幕，但还看得出「站在门框里」。
+ */
+const DOOR_COVER = 0.94
+const DOOR_HOLE_W_RATIO = (DOOR.width / 100) * (16 / 9) // 门洞宽 / 层高
+const DOOR_HOLE_H_RATIO = DOOR.height / 100 // 门洞高 / 层高
+
+/** 对齐层的尺寸（vw/vh 表达式）：让门洞 cover 视口，纯 CSS 算，不依赖 JS 量视口 */
+export const doorLayerSize = () => ({
+  height: `max(${((DOOR_COVER / DOOR_HOLE_W_RATIO) * 100).toFixed(2)}vw, ${(
+    (DOOR_COVER / DOOR_HOLE_H_RATIO) *
+    100
+  ).toFixed(2)}vh)`,
+})
+
+/**
+ * 同一套几何的纯函数版：给定视口像素，返回门洞在屏幕上的像素尺寸。
+ * 组件里用 CSS 表达，测试用这个锁住「门洞 ≥ COVER × 视口」的不变量。
+ */
+export function doorHolePx(vw, vh) {
+  const layerH = Math.max(
+    (vw * DOOR_COVER) / DOOR_HOLE_W_RATIO,
+    (vh * DOOR_COVER) / DOOR_HOLE_H_RATIO,
+  )
+  return { width: layerH * DOOR_HOLE_W_RATIO, height: layerH * DOOR_HOLE_H_RATIO }
+}
+
 const ASSET = {
   frame: `${BASE}wallpapers/suzume-door-frame.png`,
   panel: `${BASE}wallpapers/suzume-door-panel.png`,
@@ -53,7 +92,7 @@ export default function HomeIntro() {
       /* ignore */
     }
     return 'run'
-  }) // run | open | done
+  }) // run | open | leaving | done
   const [progress, setProgress] = useState(0)
 
   const cover = getMonthCover(monthlyCoverIndex())
@@ -97,19 +136,33 @@ export default function HomeIntro() {
     }
   })()
 
+  // 门滑完再停留一段，然后淡出——门后是常世星空，直接卸载会硬切成首屏
   useEffect(() => {
     if (phase !== 'open' || frozen) return undefined
-    const timer = window.setTimeout(() => setPhase('done'), EXIT)
+    const timer = window.setTimeout(() => setPhase('leaving'), EXIT)
     return () => window.clearTimeout(timer)
   }, [phase, frozen])
 
+  useEffect(() => {
+    if (phase !== 'leaving') return undefined
+    const timer = window.setTimeout(() => setPhase('done'), FADE)
+    return () => window.clearTimeout(timer)
+  }, [phase])
+
   if (phase === 'done') return null
 
-  const open = phase === 'open'
+  const open = phase !== 'run'
+  const leaving = phase === 'leaving'
   const slide = 'transition-transform duration-[1000ms] ease-expo-in-out'
 
   return createPortal(
-    <div className="fixed inset-0 z-[200]" aria-hidden={open}>
+    <div
+      data-testid="intro-layer"
+      className={`fixed inset-0 z-[200] transition-opacity duration-500 ease-out ${
+        leaving ? 'opacity-0' : 'opacity-100'
+      }`}
+      aria-hidden={open}
+    >
       {/* ── 底层：一幅完整的画，门打开后看到的就是它 ── */}
       <div className="absolute inset-0 overflow-hidden">
         <img
@@ -119,7 +172,7 @@ export default function HomeIntro() {
         />
         <div className="absolute inset-0" style={{ background: cover.theme.overlay }} />
         {/* 立场：与首屏 Hero 完全对齐（left-74% / -bottom-4% / h-97%），
-            这样门滑开的那一刻和门后的首屏严丝合缝，人物不会"跳"一下 */}
+            这样门滑开、开场层淡出之后和首屏严丝合缝，人物不会"跳"一下 */}
         <div
           className="absolute -bottom-[4%] left-[74%] hidden h-[97%] -translate-x-1/2 md:block"
           style={{
@@ -140,11 +193,16 @@ export default function HomeIntro() {
         />
       </div>
 
-      {/* ── 铃芽之门：门洞（常世）→ 两扇门板 → 门框，三层同处一个 16:9 对齐层 ── */}
+      {/* ── 铃芽之门：门洞（常世）→ 两扇门板 → 门框，三层同处一个 16:9 对齐层 ──
+          对齐层放大到门洞盖住视口（见 DOOR_COVER 注释），并把门洞中心拉回屏幕中心 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        style={{ width: 'max(100vw, 177.78vh)', aspectRatio: '16 / 9' }}
+        className="pointer-events-none absolute left-1/2 top-1/2"
+        style={{
+          ...doorLayerSize(),
+          aspectRatio: '16 / 9',
+          transform: `translate(-50%, calc(-50% - ${(DOOR_CENTER_Y - 50).toFixed(2)}%))`,
+        }}
       >
         {/* 门洞：门板滑开后露出来的常世 */}
         <div
@@ -164,14 +222,21 @@ export default function HomeIntro() {
               open ? 'opacity-100' : 'opacity-0'
             }`}
           />
-          {/* 两扇门板：从中间向两侧滑开，滑出即被门洞裁掉 */}
+          {/* 两扇门板：从中间向两侧滑开，滑出即被门洞裁掉。
+              门板原素材是近白的门（rgb≈220），铺满整屏会是一片亮白，
+              压到 0.45 亮度：门还是那道门，但夜景站点的霓虹字和进度条读得清 */}
           <div
             data-testid="intro-door-left"
             className={`absolute inset-y-0 left-0 w-1/2 ${slide} ${
               open ? '-translate-x-full' : 'translate-x-0'
             }`}
           >
-            <img src={ASSET.panel} alt="" className="h-full w-full object-fill" />
+            <img
+              src={ASSET.panel}
+              alt=""
+              className="h-full w-full object-fill"
+              style={{ filter: 'brightness(0.45)' }}
+            />
           </div>
           <div
             data-testid="intro-door-right"
@@ -179,7 +244,12 @@ export default function HomeIntro() {
               open ? 'translate-x-full' : 'translate-x-0'
             }`}
           >
-            <img src={ASSET.panel} alt="" className="h-full w-full object-fill" />
+            <img
+              src={ASSET.panel}
+              alt=""
+              className="h-full w-full object-fill"
+              style={{ filter: 'brightness(0.45)' }}
+            />
           </div>
           {/* 门缝：关门时中间那一条暗线 */}
           <div
