@@ -58,7 +58,7 @@
 
 **文案**：导航 / 页脚 / 索引卡片墙里的「文章」统一改成「博客」（都指向同仓 `blog/` 子站，四个入口 `Navbar.jsx`、`data/site.js`、`Footer.jsx`、`data/indexCards.js`）。
 
-**入口最终形态（10-18 晚）**：导航第一二位并列 `主页`（`/home` 卡片墙，imsyy/home 那种）+ `博客`（`blog/` 子站 Firefly），落地页 `/` 由左上「牧」标记回去，不再单独占导航位；页脚站点地图同步加 `主页`。子站右上角加了 home 图标 → `/portfolio/`，与主站「博客」构成双向切换。
+**入口最终形态（10-18 晚）**：导航第一二位并列 `主页`（`/home` 卡片墙，imsyy/home 那种）+ `博客`（`blog/` 子站 Firefly），落地页 `/` 由左上「牧」标记回去，不再单独占导航位；页脚站点地图同步加 `主页`。子站右上角是**带文字的「返回主站」按钮**（箭头 + 文字，`< sm` 只留箭头）→ `/portfolio/`，与主站「博客」构成双向切换。**别做成纯图标**：第一版用了 house 图标，用户直接反馈「进到子网站怎么回去」——找不到。
 
 > **Git Bash 会吃掉 `VITE_BASE`**：`VITE_BASE=/portfolio/ npx vite build` 在 MSYS 下会被改写成 `C:/Program Files/Git/portfolio/`，产物里所有链接变成 `/Program%20Files/...`（主站「博客」直接指飞）。本地复现预览必须写成 `MSYS_NO_PATHCONV=1 VITE_BASE=/portfolio/ npx vite build`。CI（Linux）没有这个问题。
 
