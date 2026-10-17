@@ -162,8 +162,13 @@ export function buildAtomFeed(opts: {
 		generator,
 		includeContent = true,
 	} = opts;
-	const siteRoot = toAbsoluteUrl(site, "/");
-	const selfLink = toAbsoluteUrl(site, "atom.xml");
+	// site 只是 origin（Astro.site = siteConfig.site_url），而站点实际部署在 base 子路径下
+	// （/portfolio/blog）。不补前缀的话，channel 的 <link> 和 rel="self" 会掉到根域，
+	// 订阅器打开的是主站首页、自引用指向不存在的 /atom.xml。
+	// entry.link 走的是 url()，本身已带 base，不要再加。
+	const base = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+	const siteRoot = toAbsoluteUrl(site, `${base}/`);
+	const selfLink = toAbsoluteUrl(site, `${base}/atom.xml`);
 	const feedUpdated =
 		entries.reduce<Date | null>(
 			(latest, e) =>

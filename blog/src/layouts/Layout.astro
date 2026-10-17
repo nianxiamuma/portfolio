@@ -494,14 +494,14 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
       rel="alternate"
       type="application/rss+xml"
       title={profileConfig.name}
-      href={`${Astro.site}rss.xml`}
+      href={new URL(url("/rss.xml"), Astro.site).toString()}
     />
 
     <link
       rel="alternate"
       type="application/atom+xml"
       title={profileConfig.name}
-      href={`${Astro.site}atom.xml`}
+      href={new URL(url("/atom.xml"), Astro.site).toString()}
     />
 
     <!-- Font Setup (Astro Font API) -->

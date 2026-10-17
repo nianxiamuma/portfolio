@@ -7,9 +7,21 @@
 
 ## 〇、新会话从这里开始（30 秒上手）
 
-**这个仓库现在的状态**：本地 `main` 领先 `origin/main` **5 个提交**（`3456a44` 抽奖机、`a92bba8` 友链真提交、`df87935` handoff、`24e9356` 来源页、`0abd7ef` 文章结构能力），工作区干净，**还没 push**。
+**这个仓库现在的状态**（2026-10-18 02:50 更新）：`main` 与 `origin/main` 同步，工作区有一批**未提交**改动（见下面「本轮改动」），改动验证过：主站 `vitest` 139 项全绿、`vite build` 绿、博客 `astro build` 23 页绿、首页/归档/关于三页已截图核对。
 
-**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）
+**本轮改动（2026-10-18，去模板化收尾）**：
+
+| 文件 | 改了什么 |
+| --- | --- |
+| `src/components/Footer.jsx` | 页脚「归档」「标签」原本指向 `/archive`、`/tags`——那两个路由随旧博客系统一起删了，点击会被通配路由弹回首页。改为博客子站的 `blog/archive/`、`blog/tags/`（标 `external` 走 `<a href>`）；顺带把重复的 `/about` 项（React key 冲突来源）去掉 |
+| `blog/src/config/siteConfig.ts` | 按「有没有真内容」重定页面开关：`guestbook`/`dynamic`/`projects`/`gallery`/`sponsor` 全关（对应内容目录为空、评论系统未接、收款码未换），导航与 sitemap 一并消失；清空 mal/bangumi/vndb/bilibili 里模板作者的账号 |
+| `blog/src/config/commentConfig.ts` | 清空 twikoo/waline/artalk/giscus/disqus 的模板作者与官方 demo 端点，避免哪天切 `type` 就把评论写进别人家 |
+| `blog/src/config/backgroundWallpaper.ts` | 首页横幅从模板作者的流萤立绘换成 `scene-blog.jpg`（主站同场景壁纸副本）；标题 `Lovely firefly!` → `年下牧马`，六条流萤英文语录换成三句自己的；背景视频（`bed.twoleaf.cn` 上的作者视频）停用 |
+| `blog/src/config/pioConfig.ts` | 看板娘开场白去掉「我是流萤~」 |
+| `blog/src/pages/rss.xml.ts`、`blog/src/utils/feed-utils.ts` | RSS/Atom 的 channel link 与 `rel="self"` 原本掉到根域（`https://nianxiamuma.github.io/`），补上 `/portfolio/blog` base 前缀 |
+| `blog/astro.config.mjs` | sitemap 过滤逻辑拿不含 base 的 `/gallery/` 去比含 base 的 pathname，永远不匹配 → 关掉的页面照样进 sitemap。改为先剥 base 再判断；补上模板漏掉的 `/projects/` 一条 |
+
+**正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）；博客去模板化没有单独的计划文件，改动依据都在本段与 git log 里。
 
 **二期新增（2026-10-16，对标参照站补完成度）**：
 - **站点小部件**（Hero 底部）：时钟/问候语/时光进度条/今日一句 —— `src/lib/timeParts.js`、`src/lib/dailySlip.js`（按日期哈希从 52 条纸条库取当日一句，不引外部 API）、`src/components/SiteWidgets.jsx`。interval 在 `document.hidden` 时暂停（fps 纪律）。
@@ -19,9 +31,9 @@
 **Wave 6 布局实测结论（2026-10-16）**：罗盘 8 卡在 1440/768 两档实测零重叠零越界（几何探针），375 以下选择器整层 `hidden md:block` 不渲染——「窄屏拥挤」风险关闭，无需修复。
 **性能定位修正（2026-10-16，fps-probe 实测）**：冷/热差异可忽略（avg 28.69 vs 28.37ms），「冷启动尖峰」假设证伪；掉帧真源是**常驻 CSS 动画**——`RIVET_KILL=anim` 后 avg 17.09ms、over33ms 6 次 vs 基线 59 次。若要做性能优化，方向是动画减量/降频（需用户拍板取舍，未动）。
 
-**两件挂着等用户拍板的事**（不要自行执行）：
-1. 删除死代码 `src/lib/slotMachine.js` 与 `src/__tests__/slotMachine.test.js` —— 逻辑已搬到 `src/lib/oracle.js`，删除不可逆
-2. `git push origin main` —— 对外发布
+**挂着等用户拍板的事**（不要自行执行）：
+1. `git push origin main` —— 对外发布（本轮改动提交后由用户决定时机）
+2. 博客内容：`blog/src/content/posts/` 目前只有 1 篇开篇文章，写什么由用户决定；主站旧文章（含 2 篇代笔草稿）随旧博客系统一起删了，没有迁移
 
 **环境上的三个坑**（会浪费时间，先知道）：
 - **dev server 会自己挂**（跑着跑着进程没了，`curl` 返回 `http=000`）。重启即可：`node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173`（本机 `npm run` 被劫持，必须直接调入口）
@@ -155,8 +167,8 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 
 ### 需要用户拍板
 
-1. **删除死代码** `src/lib/slotMachine.js` + `src/__tests__/slotMachine.test.js`（逻辑已搬到 `src/lib/oracle.js`，无人引用；删除不可逆）
-2. **push**（本地领先 2 个提交，含 46MB 图）
+1. ~~**删除死代码** `src/lib/slotMachine.js` + `src/__tests__/slotMachine.test.js`~~ ✅ 已删（连同旧博客的 posts.js / postOutline / searchIndex / SearchPanel 与四个文章页）
+2. **push**（本轮改动提交后仍需用户点头）
 3. **6 个项目卡的真实地址**：`src/data/projects.js` 里 6 条 `url` 全是裸 `https://github.com/`，点进去等于没去。真实地址只有作者知道，不要替他编
 4. **仓库体积**：`public/wallpapers` 已 88MB，要不要砍
 

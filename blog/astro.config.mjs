@@ -65,13 +65,16 @@ const adapter = process.env.CF_WORKERS
 		})
 	: undefined;
 
+// GitHub Pages 项目页：主站在 /portfolio/，博客挂在 /portfolio/blog/
+// 可用 BLOG_BASE 覆盖（CI 里注入，避免仓库改名后失配）
+const BLOG_BASE = process.env.BLOG_BASE || "/portfolio/blog";
+const BLOG_BASE_TRIMMED = BLOG_BASE.replace(/\/$/, "");
+
 // https://astro.build/config
 export default defineConfig({
 	site: siteConfig.site_url,
 
-	// GitHub Pages 项目页：主站在 /portfolio/，博客挂在 /portfolio/blog/
-	// 可用 BLOG_BASE 覆盖（CI 里注入，避免仓库改名后失配）
-	base: process.env.BLOG_BASE || "/portfolio/blog",
+	base: BLOG_BASE,
 	trailingSlash: "always",
 
 	// 字体配置 - 只加载实际使用的字体，跳过未引用的以加快构建
@@ -238,10 +241,20 @@ export default defineConfig({
 		svelte(),
 		sitemap({
 			filter: (page) => {
-				// 根据页面开关配置过滤sitemap
-				const url = new URL(page);
-				const pathname = url.pathname;
+				// 根据页面开关配置过滤 sitemap。
+				// 注意：sitemap 插件传进来的是绝对 URL，pathname 自带 base 前缀
+				// （/portfolio/blog/gallery/）。直接拿 "/gallery/" 去比永远不相等 ——
+				// 关掉的页面照样会被写进 sitemap，所以先剥掉 base 再判断。
+				const fullPath = new URL(page).pathname;
+				const pathname =
+					BLOG_BASE_TRIMMED && fullPath.startsWith(BLOG_BASE_TRIMMED)
+						? fullPath.slice(BLOG_BASE_TRIMMED.length) || "/"
+						: fullPath;
 				if (pathname === "/dynamic/" && !siteConfig.pages.dynamic) {
+					return false;
+				}
+				// 项目页：上游模板的 filter 漏了这条，关掉的项目页仍会出现在 sitemap 里
+				if (pathname === "/projects/" && !siteConfig.pages.projects) {
 					return false;
 				}
 				if (pathname.startsWith("/gallery/") && !siteConfig.pages.gallery) {

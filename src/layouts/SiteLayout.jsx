@@ -3,8 +3,14 @@ import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import BackgroundStage from '../components/BackgroundStage'
-import SearchPanel from '../components/SearchPanel'
 import { BackgroundProvider } from '../context/BackgroundContext'
+
+/**
+ * 博客子站地址（同仓 blog/ 子站的 Astro + Firefly 构建产物）。
+ * 主站不再维护文章索引：旧的内存搜索面板连同 posts.js 一并移除，
+ * 全文搜索由 Firefly 自带的 pagefind 在博客内提供。
+ */
+const BLOG_URL = `${import.meta.env.BASE_URL}blog/`
 
 /**
  * 全站外壳。
@@ -20,6 +26,18 @@ export default function SiteLayout() {
     window.scrollTo(0, 0)
   }, [pathname])
 
+  // Cmd/Ctrl+K 原本唤出主站文章搜索面板；文章迁走后改为直接打开博客搜索。
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        window.location.href = BLOG_URL
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   return (
     <BackgroundProvider>
       <BackgroundStage />
@@ -29,7 +47,6 @@ export default function SiteLayout() {
           <Outlet />
         </main>
         <Footer />
-        <SearchPanel />
       </div>
     </BackgroundProvider>
   )

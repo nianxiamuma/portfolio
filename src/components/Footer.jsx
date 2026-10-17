@@ -16,13 +16,17 @@ const SOCIAL = [
   { icon: Mail, label: '邮件', href: `mailto:${EMAIL}` },
 ]
 
+/**
+ * 站点地图。文章三项都指向同仓 blog/ 子站（Astro + Firefly 的静态产物），
+ * 必须标 external —— 这些路径不在 React 路由表里，用 <Link> 会被通配路由弹回首页。
+ * 旧版本这里还留着 /archive、/tags 两条主站路由，那两条路由已随旧博客系统一起删除。
+ */
 const SITEMAP = [
   { label: '文章', to: `${import.meta.env.BASE_URL}blog/`, external: true },
-  { label: '归档', to: '/archive' },
-  { label: '标签', to: '/tags' },
+  { label: '归档', to: `${import.meta.env.BASE_URL}blog/archive/`, external: true },
+  { label: '标签', to: `${import.meta.env.BASE_URL}blog/tags/`, external: true },
   { label: '关于我', to: '/about' },
   { label: '神谕', to: '/glimmer' },
-  { label: '藏书与游戏', to: '/about' },
   { label: '留言板', to: '/guestbook' },
   { label: '来源与致谢', to: '/sources' },
 ]

@@ -7,22 +7,28 @@ import { resolveSiteLang } from "../utils/site-config-utils";
 const SITE_LANG = resolveSiteLang("zh_CN");
 
 // 页面开关配置 - 控制特定页面的访问权限，设为false会返回404并自动隐藏对应的导航栏菜单项
+//
+// 2026-10-18 统一收口：上一轮只把模板作者的内容删了，开关却还开着 ——
+// 线上结果是导航里挂着一批点进去空无一物的页面。现在按「有没有真内容」重新定档：
+//   有内容 → true（首页/归档/分类/标签/系列/友链/书签/关于/搜索）
+//   空壳   → false（下面每条都写了空的原因，补上内容后把开关改回来即可）
 const pages = resolvePageToggles({
 	// ── 社交 (Social) ──────────────────────────────────
 
 	// 友链页面开关
 	friends: true,
-	// 留言板页面开关，需要配置评论系统
-	guestbook: true,
+	// 留言板页面开关：需要先在 commentConfig.ts 接入评论系统（当前 type: "none"），
+	// 没有后端的留言板打不开也留不了言，先关。
+	guestbook: false,
 
 	// ── 我的 (My) ──────────────────────────────────
 
-	// 动态页面开关
-	dynamic: true,
-	// 项目展示页开关
-	projects: true,
-	// 相册页面开关
-	gallery: true,
+	// 动态页面开关：blog/src/content/dynamic/ 是空目录，没有一条动态
+	dynamic: false,
+	// 项目展示页开关：blog/src/content/projects/ 是空目录
+	projects: false,
+	// 相册页面开关：galleryConfig.albums 为空（模板示例相册已随图片一起删除）
+	gallery: false,
 	// 书签导航页面开关
 	booknav: true,
 	// 哔哩哔哩追番页面开关
@@ -36,8 +42,9 @@ const pages = resolvePageToggles({
 
 	// ── 关于 (About) ──────────────────────────────────
 
-	// 打赏页面开关
-	sponsor: true,
+	// 打赏页面开关：sponsorConfig 里四种方式全部 enabled: false（收款码是模板作者的，
+	// 换成自己的之前开着只会是一个空页面），showButtonInPost 也已关。
+	sponsor: false,
 });
 
 export const siteConfig: SiteConfig = {
@@ -89,7 +96,7 @@ export const siteConfig: SiteConfig = {
 	favicon: [
 		{
 			// 图标文件路径
-			src: "/favicon/firefly-32.png",
+			src: "/favicon/site-icon.png",
 			// 可选，指定主题 'light' | 'dark'
 			// theme: "light",
 			// 可选，图标大小
@@ -110,12 +117,11 @@ export const siteConfig: SiteConfig = {
 		// 使用 Astro 图标库时不需要设置 valueDark，图标会自动跟随主题亮暗色切换
 		logo: {
 			type: "image",
-			value: "assets/images/logo/firefly-light.png",
-			valueDark: "assets/images/logo/firefly-dark.png",
-			alt: "🍀",
+			value: "assets/images/logo/site-icon.png",
+			alt: "年下牧马",
 		},
 		// 导航栏标题
-		title: "Firefly Blog",
+		title: "年下牧马",
 		// 全宽导航栏，导航栏是否占满屏幕宽度
 		widthFull: false,
 		// 导航菜单对齐方式，left：左对齐，center：居中
@@ -130,7 +136,8 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// 站点开始日期，用于统计运行天数
-	siteStartDate: "2025-01-01",
+	// 2026-10-17 是博客子站（Firefly）首次上线的提交日，不是主站建站日
+	siteStartDate: "2026-10-17",
 
 	// 站点时区（IANA 时区字符串），用于格式化bangumi、rss里的构建日期时间等等..
 	// 示例："Asia/Shanghai", "UTC", 如果为空，则按照构建服务器的时区进行时区转换
@@ -260,13 +267,13 @@ export const siteConfig: SiteConfig = {
 	// ── Bilibili配置 ──────────────────────────────────
 	bilibili: {
 		// 你的 Bilibili 用户 UID
-		uid: "38932988",
+		uid: "",
 	},
 
 	// ── 番组计划bangumi配置 ──────────────────────────────────
 	bangumi: {
 		// Bangumi用户ID
-		userId: "1143164",
+		userId: "",
 		// 数据模式：static=构建时获取，dynamic=客户端实时获取
 		// static 模式在构建时获取数据并静态渲染，部署后数据不更新
 		// dynamic 模式在浏览器中实时请求 API，始终显示最新数据
@@ -290,7 +297,7 @@ export const siteConfig: SiteConfig = {
 	// ── VNDB配置 ──────────────────────────────────
 	vndb: {
 		// VNDB 用户 ID
-		userId: "u358128",
+		userId: "",
 		// 数据模式：static=构建时获取，dynamic=客户端实时获取
 		// static 模式在构建时获取数据并静态渲染，部署后数据不更新
 		// dynamic 模式在浏览器中实时请求 API，始终显示最新数据
@@ -310,9 +317,9 @@ export const siteConfig: SiteConfig = {
 	// ── MyAnimeList配置 ──────────────────────────────────
 	mal: {
 		// MyAnimeList 用户名（列表需为公开状态，私密列表无法读取）
-		username: "cuteleaf",
+		username: "",
 		// MyAnimeList Client ID，在 https://myanimelist.net/apiconfig 注册免费应用后获取
-		clientId: "	0ef34371450f9c6c809deaadec6aa8f3",
+			clientId: "",
 		// MAL API 地址
 		apiUrl: "https://api.myanimelist.net/v2",
 		// 动画条目详情页地址，末尾需要带 /
