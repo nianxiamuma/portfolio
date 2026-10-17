@@ -14,7 +14,32 @@ import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
  */
 const HOLD = 1100 // 进度条走满的时间（ms）
 const OPEN_DELAY = 420 // 走满后停顿再开门
-const EXIT = 1000 // 门滑完的时间，与下面 duration-[1000ms] 保持一致
+const SLIDE = 1200 // 两扇门板滑开的时间（ms），与下面 duration-[1200ms] 保持一致
+const EXIT = 2400 // 门滑完 + 停顿后卸载开场层（ms）
+
+/** 部署基路径；字符串资源路径必须手动拼，Vite 不会改写字符串 */
+const BASE = import.meta.env.BASE_URL
+
+/**
+ * 铃芽之门（2026-10-18 第二次重做）：
+ * 门不再是盖住整屏的深色挡板，而是立在场景里的一扇真门——
+ * 门框 + 两扇门板 + 门后的常世，开门时门板向两侧滑开、露出门内的星空。
+ *
+ * 素材来自 Steam 创意工坊壁纸 2953775561 的 scene.pkg（RePKG 解包后按层导出）：
+ * - `suzume-door-frame.png`：门框（3840×2160 透明 PNG，只有中央一圈框线，opaque 0.7%）
+ * - `suzume-door-panel.png`：单扇门板（270×579，原素材「门门」）
+ * - `suzume-afterworld.jpg`：门后的常世（1205×2462 竖幅，缩到 960 宽）
+ *
+ * `DOOR` 是从门框 alpha 通道的 bbox 实测换算的百分比（3840×2160 下
+ * x 1560–2279、y 1005–1652）：三个图层都放进同一个 16:9 对齐层里，
+ * 任何视口下都按同一套 cover 裁切，门框、门洞、门板不会错位。
+ */
+const DOOR = { left: 40.62, top: 46.53, width: 18.72, height: 29.95 }
+const ASSET = {
+  frame: `${BASE}wallpapers/suzume-door-frame.png`,
+  panel: `${BASE}wallpapers/suzume-door-panel.png`,
+  afterworld: `${BASE}wallpapers/suzume-afterworld.jpg`,
+}
 
 export default function HomeIntro() {
   const [phase, setPhase] = useState(() => {
@@ -81,9 +106,7 @@ export default function HomeIntro() {
   if (phase === 'done') return null
 
   const open = phase === 'open'
-  const doorBase =
-    'absolute inset-y-0 w-1/2 overflow-hidden bg-[#070a12] transition-transform duration-[1000ms] ease-expo-in-out'
-  const grid = 'absolute inset-0 bg-grid-faint [background-size:64px_64px] opacity-[0.18]'
+  const slide = 'transition-transform duration-[1200ms] ease-expo-in-out'
 
   return createPortal(
     <div className="fixed inset-0 z-[200]" aria-hidden={open}>
@@ -117,19 +140,66 @@ export default function HomeIntro() {
         />
       </div>
 
-      {/* ── 两扇门 ── */}
-      <div className={`${doorBase} left-0 ${open ? '-translate-x-full' : 'translate-x-0'}`}>
-        <div className={grid} />
-        <div className="absolute inset-y-0 right-0 w-px bg-white/[0.09]" />
-      </div>
-      <div className={`${doorBase} right-0 ${open ? 'translate-x-full' : 'translate-x-0'}`}>
-        <div className={grid} />
-        <div className="absolute inset-y-0 left-0 w-px bg-white/[0.09]" />
+      {/* ── 铃芽之门：门洞（常世）→ 两扇门板 → 门框，三层同处一个 16:9 对齐层 ── */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{ width: 'max(100vw, 177.78vh)', aspectRatio: '16 / 9' }}
+      >
+        {/* 门洞：门板滑开后露出来的常世 */}
+        <div
+          data-testid="intro-doorway"
+          className="absolute overflow-hidden"
+          style={{
+            left: `${DOOR.left}%`,
+            top: `${DOOR.top}%`,
+            width: `${DOOR.width}%`,
+            height: `${DOOR.height}%`,
+          }}
+        >
+          <img src={ASSET.afterworld} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          {/* 常世的光：开门那一刻才亮 */}
+          <div
+            className={`absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(208,235,255,0.6),transparent_68%)] transition-opacity duration-[1200ms] ${
+              open ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+          {/* 两扇门板：从中间向两侧滑开，滑出即被门洞裁掉 */}
+          <div
+            data-testid="intro-door-left"
+            className={`absolute inset-y-0 left-0 w-1/2 ${slide} ${
+              open ? '-translate-x-full' : 'translate-x-0'
+            }`}
+          >
+            <img src={ASSET.panel} alt="" className="h-full w-full object-fill" />
+          </div>
+          <div
+            data-testid="intro-door-right"
+            className={`absolute inset-y-0 right-0 w-1/2 ${slide} ${
+              open ? 'translate-x-full' : 'translate-x-0'
+            }`}
+          >
+            <img src={ASSET.panel} alt="" className="h-full w-full object-fill" />
+          </div>
+          {/* 门缝：关门时中间那一条暗线 */}
+          <div
+            className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/20 transition-opacity duration-300 ${
+              open ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+        </div>
+
+        {/* 门框：盖在门板之上，滑出的门板从框后消失 */}
+        <img
+          src={ASSET.frame}
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
       </div>
 
       {/* ── 门上的品牌层：进度走完就淡出，别挡开门 ── */}
       <div
-        className={`pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-300 ${
+        className={`pointer-events-none absolute inset-x-0 top-[13vh] flex justify-center transition-opacity duration-300 ${
           open ? 'opacity-0' : 'opacity-100'
         }`}
       >
