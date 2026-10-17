@@ -217,7 +217,7 @@ const ORACLE_BG = [
  * 月份 → 角度：1月=0°(正上)，之后每月 +30°，12月=330°。
  */
 export const MONTH_COVERS = [
-  { month: 1, index: 1, name: '睦月', angle: 0, poem: ['寒宵正是读书天', '一盏青灯伴雪眠'], style: '灰原哀系萝莉、茶棕内扣波波头、奶白居家毛衣' },
+  { month: 1, index: 1, name: '睦月', angle: 0, poem: ['寒宵正是读书天', '一盏青灯伴雪眠'], style: '灰原哀式娇小身形、茶棕内扣波波头、奶白居家毛衣' },
   { month: 2, index: 2, name: '如月', angle: 30, poem: ['梅心已自暖', '不必待春风'], style: '新中式少女、黑长直红发饰、改良旗袍马面裙' },
   { month: 3, index: 3, name: '弥生', angle: 60, poem: ['春路雨添花', '花动一山春色'], style: '元气少女、高马尾、JK制服白色堆堆袜' },
   { month: 4, index: 4, name: '卯月', angle: 90, poem: ['人间四月芳菲尽', '山寺桃花始盛开'], style: '开朗大姐姐、鱿鱼须发型、卫衣鸭舌帽大长腿' },
