@@ -7,7 +7,7 @@
 
 ## 〇、新会话从这里开始（30 秒上手）
 
-**这个仓库现在的状态**（2026-10-18 04:10 更新）：工作区**干净**，`main` **领先 `origin/main` 7 个提交**（等用户拍板 push，见下面「挂着等用户拍板的事」）。最新一批是视觉改版（12 个月立绘 / 首屏 5:5 分栏 / 开场两扇门 / About 米白大字），复核状态：主站 `vitest` **139 项全绿**、`vite build` **绿**（1929 modules，8.15s）、首页/About/开场三张截图已核对（`.rivet/scratch/选图/`）。
+**这个仓库现在的状态**（2026-10-18 04:25 更新）：工作区**干净**，`main` **领先 `origin/main` 9 个提交**（等用户拍板 push，见下面「挂着等用户拍板的事」）。最新一批是视觉改版（12 个月立绘 / 首屏 5:5 分栏 / **真正的铃芽之门开场** / About 米白大字），复核状态：主站 `vitest` **146 项全绿**（17 文件：基线 139 + 开场新增 7）、`vite build` **绿**（1929 modules，6.63s）、开场门关/门开两态 CDP 实测截图在 `.rivet/scratch/选图/door-closed.png`、`door-open.png`。
 
 **本轮改动（2026-10-18，去模板化收尾）**：
 
@@ -31,6 +31,21 @@
 | `e647946` | 开场重做：底层是一幅完整的画（场景 + 当月立绘），**两扇独立深色门**从两侧滑开（上一版把照片切两半，人物被从中间剖开）；去掉 localStorage「每天一次」限制，**每次进入都播**；`?nointro` 跳过、`?introopen` 冻结在开门态（headless 截图用，rAF 在 headless 下不推进） |
 | `6374077` | About 第二段换米白大字 + 大圆角插画卡：整段 `#f2efe6`、主视觉换铃芽之旅的门（4K，来自 Steam 创意工坊壁纸 `2953775561` 的 `scene.pkg`，RePKG 解包出前景 `suzume-gate.jpg` 与背景 `suzume-gate-back.jpg` 两层），pin + scrub 从 `scale 0.64` 放大到全屏 |
 
+**开场二次重做（2026-10-18 04:25，真正的铃芽之门）**：`e647946` 那版的门是盖住整屏的深色挡板，这次把 `scene.pkg` 解包出的三层素材接进 `src\components\HomeIntro.jsx`（提交 `30801c2`）——
+
+| 层 | 素材 | 说明 |
+| --- | --- | --- |
+| 门后常世 | `public\wallpapers\suzume-afterworld.jpg` | 原素材「铃芽之旅常世」1205×2462 竖幅，缩到 960 宽（214KB）；门洞内 `object-cover` |
+| 两扇门板 | `public\wallpapers\suzume-door-panel.png` | 原素材「门门」270×579（120KB），单扇，两扇共用；`object-fill` 拉伸填满门洞各半 |
+| 门框 | `public\wallpapers\suzume-door-frame.png` | 3840×2160 透明 PNG 缩到 2560×1440（93KB），只有中央一圈框线（opaque 0.7%） |
+
+- **门洞位置是实测的，不是估的**：门框 alpha 通道 bbox = (1560,1005)–(2279,1652)，换算成百分比 `40.62% / 46.53% / 18.72% / 29.95%`。三层塞进**同一个 16:9 对齐层**（宽 `max(100vw,177.78vh)`），任何视口都按同一套 cover 裁切，门框与门板不会错位——这是上一版「门板盖整屏」做不到的。
+- **开门机制**：两扇门板各滑出自身宽度（`translate-x ∓100%`），滑出部分被门洞的 `overflow-hidden` 裁掉，露出常世；门滑 `1200ms`，卸载推迟到 `2400ms`（原 `EXIT=1000` 会在门滑一半时整个开场层消失）。
+- **品牌层上移**到 `top-[13vh]`：门洞在 y 46.5%–76.5%，原来居中的进度条/站名会压在门上。
+- **补上此前完全缺失的开场测试** `src\__tests__\homeIntro.test.jsx`（7 项）：门洞/两扇门板/门框结构、三层素材接入、fake timers 推进后开门、滑完自行卸载、`?nointro`、`?introopen`、`prefers-reduced-motion` 直落 done。
+- **CDP 实测**（探针 `.rivet\scratch\door-probe.mjs`，1440×900）：门洞 rect `565.9,418.8,299.5×269.5` 与 16:9 层百分比换算逐项一致；关门态两门板各 `149.8` 宽正好拼满门洞（565.9+149.8=715.7）；开门态 `transform` 为 `±149.75`；三张素材 `complete`、`naturalWidth` 正常、无 console 错误、无 4xx；门洞区域平均色 关闭 `(214,218,212)` 白门 → 打开 `(145,147,178)` 常世，变化可见。
+- **素材层级语义**（解包后实测，与直觉不同）：`铃芽之旅门前` 是**天空 alpha 透明的外景**、`铃芽之旅门后` 是**天空完整的外景**，两张在门洞位置都是白色占位；`门框` 只有中央一圈框线；`门门` 是单扇门板；`常世` 才是门后的景象。原素材还有 `门门边`/`门门边上`/`门阴影`/`门水遮罩`/`常世草遮罩`/`铃芽`/`铃芽倒影`，本次都没用（`铃芽.png` 导出后又删掉了，避免多一个无引用资产）。
+
 **正在进行的计划**：`.rivet/plans/网站完成度设计-对标-6-个参照站-把展示站补成能长期用的小站.md`（一期，已完成）→ `.rivet/plans/网站完成度二期-站点小部件-首页片段叙事-pwa.md`（二期，已完成）；博客去模板化与 03:34–03:59 的视觉改版都没有单独的计划文件，依据在提交 body 与 `.rivet/scratch/选图/` 的截图里（`首屏-5比5.png`、`首屏-修完.png`、`开场-门关.png`、`开场-门开.png`、`about-new.png`、`about-2/3.png`）。
 
 **二期新增（2026-10-16，对标参照站补完成度）**：
@@ -42,7 +57,7 @@
 **性能定位修正（2026-10-16，fps-probe 实测）**：冷/热差异可忽略（avg 28.69 vs 28.37ms），「冷启动尖峰」假设证伪；掉帧真源是**常驻 CSS 动画**——`RIVET_KILL=anim` 后 avg 17.09ms、over33ms 6 次 vs 基线 59 次。若要做性能优化，方向是动画减量/降频（需用户拍板取舍，未动）。
 
 **挂着等用户拍板的事**（不要自行执行）：
-1. `git push origin main` —— **本地已积压 7 个提交**（`d71f345` 到 `6374077`），push 即触发 GitHub Actions 部署上线；时机由用户定
+1. `git push origin main` —— **本地已积压 9 个提交**（`d71f345` 到 `30801c2`），push 即触发 GitHub Actions 部署上线；时机由用户定
 2. 博客内容：`blog/src/content/posts/` 目前只有 1 篇开篇文章，写什么由用户决定；主站旧文章（含 2 篇代笔草稿）随旧博客系统一起删了，没有迁移
 3. **孤儿资产** `public/wallpapers/suzume-gate-back.jpg`：与门同一批解包出来的背景层，当前**无任何代码引用**（About 只用前景 `suzume-gate.jpg`）。要么用起来（About 卡片缩小时露出的边缘/其他段落），要么删——删除不可逆，等用户点头
 4. **死代码** `src/components/NovelReader.jsx`、`src/components/ParticleBackground.jsx`、`public/novel-manifest.json`：已无引用（`novel.txt` 因版权 gitignore），是否清理等用户点头
@@ -54,7 +69,7 @@
 - **`read_file` 在本环境读不了 png**（返回 `File is binary (.png format)`，不给视觉附件），`ui_preview` 也报 `Chrome/Chromium not found`（它只查标准安装路径）。本机 Chrome 实际在 `C:\Users\80727\AppData\Local\Google\Chrome\Application\chrome.exe`——视觉核验走 `.rivet/scratch/shot.mjs`（CDP 截图存盘）或改用几何/资源探针（`elementFromPoint` + `getBoundingClientRect` + `img.naturalWidth`），后者才是可断言的证据
 - **headless 下 rAF / 动画不按墙钟推进**：截图前要么用 `?nointro` / `?introopen` 这类冻结参数，要么探针里手动 `Runtime.evaluate` 推进状态，否则只能拍到动画第 0 帧
 
-**验证探针都在 `.rivet/scratch/`**（会话工作区，不在仓库里）：`shot.mjs` 截图（`node shot.mjs <url> <out.png> [--wait ms] [--scroll sel] [--click sel] [--w/--h]`，真实等待、动画能播完）、`fps-probe.mjs` 帧率、`scene-probe.mjs` 背景分段、`friend-probe.mjs` 友链提交、`oracle-probe.mjs` 抽奖机、`hit-probe.mjs` 点击命中、`shot-click.mjs` 交互截图。它们都用同一套 CDP 连本机 Chromium（路径见文件头注释）。
+**验证探针都在 `.rivet/scratch/`**（会话工作区，不在仓库里）：`shot.mjs` 截图（`node shot.mjs <url> <out.png> [--wait ms] [--scroll sel] [--click sel] [--w/--h]`，真实等待、动画能播完）、`door-probe.mjs` 开场门几何+素材加载+console 错误（`node door-probe.mjs <url> <out.png> [--wait ms] [--w 1440] [--h 900]`）、`fps-probe.mjs` 帧率、`scene-probe.mjs` 背景分段、`friend-probe.mjs` 友链提交、`oracle-probe.mjs` 抽奖机、`hit-probe.mjs` 点击命中、`shot-click.mjs` 交互截图。它们都用同一套 CDP 连本机 Chromium（路径见文件头注释）。
 
 ---
 
@@ -182,7 +197,7 @@ node node_modules/vite/bin/vite.js --host 0.0.0.0 --open   # 本机 npm run 会�
 ### 需要用户拍板
 
 1. ~~**删除死代码** `src/lib/slotMachine.js` + `src/__tests__/slotMachine.test.js`~~ ✅ 已删（连同旧博客的 posts.js / postOutline / searchIndex / SearchPanel 与四个文章页）
-2. **push**（本地积压 7 个提交，`main` 领先 `origin/main`，push 即上线，仍需用户点头）
+2. **push**（本地积压 9 个提交，`main` 领先 `origin/main`，push 即上线，仍需用户点头）
 3. **6 个项目卡的真实地址**：`src/data/projects.js` 里 6 条 `url` 全是裸 `https://github.com/`，点进去等于没去。真实地址只有作者知道，不要替他编
 4. **仓库体积**：`public/wallpapers` 已 88MB，要不要砍
 
