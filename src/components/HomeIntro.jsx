@@ -1,109 +1,55 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { WALLPAPERS } from '../lib/wallpapers'
-
-const MIN_DURATION = 900
-const OPEN_DELAY = 550
-const IMG_TIMEOUT = 3500
-
-/** 换开屏照片：改这里（壁纸清单见 src/lib/wallpapers.js，也可以填任意 URL） */
-const HOME_PHOTO = WALLPAPERS[0].scene.image
-
-/** 照片就绪 or 超时都算完成；失败/超时走纯色渐变降级，不阻塞开门 */
-const preloadPhoto = (src, onDone) => {
-  if (typeof window === 'undefined' || typeof Image === 'undefined') {
-    onDone(false)
-    return () => {}
-  }
-  const img = new Image()
-  let settled = false
-  const settle = (ok) => {
-    if (settled) return
-    settled = true
-    onDone(ok)
-  }
-  const timer = window.setTimeout(() => settle(false), IMG_TIMEOUT)
-  img.onload = () => {
-    window.clearTimeout(timer)
-    settle(true)
-  }
-  img.onerror = () => {
-    window.clearTimeout(timer)
-    settle(false)
-  }
-  img.src = src
-  return () => {
-    window.clearTimeout(timer)
-  }
-}
+import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
 
 /**
- * 照片双开门开屏：一整张照片从中间分开，滑出露出首页。
- * - 进度 = min(时间节奏, 照片就绪度)：照片没到门不开，但 3.5s 封顶，弱网不卡死
- * - 每天最多播一次（跨会话生效）；URL 带 ?intro 强制播放；prefers-reduced-motion 直接跳过
+ * 开场：人物站在场景里不动，两扇门从两侧滑开露出她。
+ *
+ * 和上一版的区别（2026-10-18 重做）：
+ * 1. 上一版是把一张照片切成左右两半各贴一扇门，开门时照片跟着裂开——人物会被从中间剖开。
+ *    现在底层是完整的一幅画（场景图 + 当月立绘），门是两扇独立的深色挡板，滑开只是让开视线。
+ * 2. 上一版「每天最多播一次」（写 localStorage），用户当天第二次刷新就再也看不到，
+ *    表现就是「开场动画没有展示」。现在每次进入都播，`?nointro` 可跳过（调试/截图用）。
+ * 3. 素材从本月方案取：场景图 + 立绘与首屏同一个人，开门之后接得上。
  */
-const introSeenToday = () => {
-  try {
-    return localStorage.getItem('introSeenDate') === new Date().toDateString()
-  } catch {
-    return false
-  }
-}
-const markIntroSeen = () => {
-  try {
-    localStorage.setItem('introSeenDate', new Date().toDateString())
-  } catch {
-    /* 隐私模式下写入失败，忽略 */
-  }
-}
+const HOLD = 1100 // 进度条走满的时间（ms）
+const OPEN_DELAY = 420 // 走满后停顿再开门
+const EXIT = 1000 // 门滑完的时间，与下面 duration-[1000ms] 保持一致
 
 export default function HomeIntro() {
   const [phase, setPhase] = useState(() => {
-    // ?intro 旁路：强制播放，方便预览调试
     try {
-      if (new URLSearchParams(window.location.search).has('intro')) return 'run'
+      const params = new URLSearchParams(window.location.search)
+      if (params.has('nointro')) return 'done'
+      // ?introopen 直接把门设成开启状态：headless 截图时 rAF/Date.now 不推进，
+      // 否则永远只能拍到 0% 的关门画面，开门效果没法验证
+      if (params.has('introopen')) return 'open'
     } catch {
       /* ignore */
     }
-    return introSeenToday() ? 'done' : 'run'
+    return 'run'
   }) // run | open | done
   const [progress, setProgress] = useState(0)
-  const [photoReady, setPhotoReady] = useState(false)
+
+  const cover = getMonthCover(monthlyCoverIndex())
 
   useEffect(() => {
+    if (phase !== 'run') return undefined
     const reduce =
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    const forced = (() => {
-      try {
-        return new URLSearchParams(window.location.search).has('intro')
-      } catch {
-        return false
-      }
-    })()
-
-    if (reduce || (introSeenToday() && !forced)) {
+    if (reduce) {
       setPhase('done')
       return undefined
     }
 
-    markIntroSeen()
-
+    const startedAt = Date.now()
     let raf = 0
     let openTimer = 0
-    let loadDone = false
-    const cancelPreload = preloadPhoto(HOME_PHOTO, (ok) => {
-      loadDone = true
-      setPhotoReady(ok)
-    })
-
-    const startedAt = Date.now()
     const tick = () => {
-      const timed = Math.min(1, (Date.now() - startedAt) / MIN_DURATION)
-      const ratio = loadDone ? timed : timed * 0.82 // 照片未就绪时进度压着不开满
+      const ratio = Math.min(1, (Date.now() - startedAt) / HOLD)
       setProgress(ratio)
-      if (timed >= 1 && loadDone) {
+      if (ratio >= 1) {
         openTimer = window.setTimeout(() => setPhase('open'), OPEN_DELAY)
         return
       }
@@ -114,63 +60,83 @@ export default function HomeIntro() {
     return () => {
       cancelAnimationFrame(raf)
       window.clearTimeout(openTimer)
-      cancelPreload()
     }
-  }, [])
+  }, [phase])
+
+  // ?introopen 时冻结在「门已开」的状态，不自动卸载——否则截图/调试只能拍到首屏
+  const frozen = (() => {
+    try {
+      return new URLSearchParams(window.location.search).has('introopen')
+    } catch {
+      return false
+    }
+  })()
 
   useEffect(() => {
-    if (phase !== 'open') return undefined
-    const timer = window.setTimeout(() => setPhase('done'), 1000)
+    if (phase !== 'open' || frozen) return undefined
+    const timer = window.setTimeout(() => setPhase('done'), EXIT)
     return () => window.clearTimeout(timer)
-  }, [phase])
+  }, [phase, frozen])
 
   if (phase === 'done') return null
 
   const open = phase === 'open'
-
-  // 关键：backgroundSize 用整屏尺寸（非 cover），左右门各显示照片的左/右半，
-  // 合起来才是一张完整的照片——「打开照片」的感觉全靠这个
-  const photoLayer = photoReady
-    ? {
-        backgroundImage: `url(${HOME_PHOTO})`,
-        backgroundSize: '100vw 100vh',
-        backgroundRepeat: 'no-repeat',
-      }
-    : { background: 'linear-gradient(150deg, #101728 0%, #04060f 100%)' }
-
   const doorBase =
-    'absolute inset-y-0 w-[51%] overflow-hidden transition-transform duration-[950ms] ease-expo-in-out'
-  // 亮色照片上压一层暗纱，保证品牌字可读
-  const scrim =
-    'absolute inset-0 bg-gradient-to-r from-void-950/75 via-void-950/50 to-void-950/75'
+    'absolute inset-y-0 w-1/2 overflow-hidden bg-[#070a12] transition-transform duration-[1000ms] ease-expo-in-out'
+  const grid = 'absolute inset-0 bg-grid-faint [background-size:64px_64px] opacity-[0.18]'
 
   return createPortal(
     <div className="fixed inset-0 z-[200]" aria-hidden={open}>
-      {/* 左半门：照片左半 */}
-      <div
-        className={`${doorBase} left-0 ${open ? '-translate-x-full' : 'translate-x-0'}`}
-        style={{ ...photoLayer, backgroundPosition: 'left center' }}
-      >
-        <div className={scrim} />
-      </div>
-      {/* 右半门：照片右半 */}
-      <div
-        className={`${doorBase} right-0 ${open ? 'translate-x-full' : 'translate-x-0'}`}
-        style={{ ...photoLayer, backgroundPosition: 'right center' }}
-      >
-        <div className={scrim} />
+      {/* ── 底层：一幅完整的画，门打开后看到的就是它 ── */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={cover.scene?.image}
+          alt=""
+          className="h-full w-full scale-[1.04] object-cover"
+        />
+        <div className="absolute inset-0" style={{ background: cover.theme.overlay }} />
+        {/* 立场：与首屏 Hero 完全对齐（left-74% / -bottom-4% / h-97%），
+            这样门滑开的那一刻和门后的首屏严丝合缝，人物不会"跳"一下 */}
+        <div
+          className="absolute -bottom-[4%] left-[74%] hidden h-[97%] -translate-x-1/2 md:block"
+          style={{
+            maskImage: 'linear-gradient(to bottom, #000 82%, transparent 98%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, #000 82%, transparent 98%)',
+          }}
+        >
+          <img src={cover.portrait} alt="" className="h-full w-auto object-contain" />
+        </div>
+        {/* 光：从人物背后打过来的柔光，避免人物像抠图 */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 45% 55% at 70% 55%, rgba(140,180,255,0.16), transparent 70%)',
+          }}
+        />
       </div>
 
-      {/* 品牌层 */}
+      {/* ── 两扇门 ── */}
+      <div className={`${doorBase} left-0 ${open ? '-translate-x-full' : 'translate-x-0'}`}>
+        <div className={grid} />
+        <div className="absolute inset-y-0 right-0 w-px bg-white/[0.09]" />
+      </div>
+      <div className={`${doorBase} right-0 ${open ? 'translate-x-full' : 'translate-x-0'}`}>
+        <div className={grid} />
+        <div className="absolute inset-y-0 left-0 w-px bg-white/[0.09]" />
+      </div>
+
+      {/* ── 门上的品牌层：进度走完就淡出，别挡开门 ── */}
       <div
-        className={`absolute inset-0 grid place-items-center transition-opacity duration-300 ${
+        className={`pointer-events-none absolute inset-0 grid place-items-center transition-opacity duration-300 ${
           open ? 'opacity-0' : 'opacity-100'
         }`}
       >
-        <div className="flex w-[min(78vw,320px)] flex-col items-center">
+        <div className="flex w-[min(72vw,300px)] flex-col items-center">
           <span className="neon-text font-mono text-3xl font-bold text-neon-lime">牧</span>
           <span className="mt-4 font-mono text-[10px] uppercase tracking-[0.32em] text-slate-500">
-            年下牧马
+            年下牧马 · {cover.name} · {cover.character}
           </span>
 
           <div className="mt-8 h-px w-full bg-white/10">
