@@ -201,18 +201,18 @@ export const getWallpaper = (index) =>
  * 背景退到后面当氛围，立绘才是主体。
  */
 const MONTH_BG = [
-  'scene/scene-about.jpg',
-  'scene/scene-about-2.jpg',
-  'scene/scene-blog.jpg',
-  'scene/scene-blog-2.jpg',
-  'scene/scene-collection.jpg',
-  'scene/scene-collection-2.jpg',
-  'scene/scene-fragments.jpg',
+  'scene/scene-blog-2.jpg', // 云海落日
+  'scene/scene-fragments-2.jpg', // 蓝天草原
+  'scene/scene-friends.jpg', // 海岸礁石
+  'scene/scene-home-about.jpg', // 山谷雪峰
+  'scene/scene-home-features-2.jpg', // 绿谷
+  'scene/scene-home-features.jpg', // 云海
+  'scene/scene-blog.jpg', // 雪山星空
+  'scene/scene-hero-2.jpg', // 星海
+  'scene/scene-about.jpg', // 工业废墟
+  'scene/scene-home-about-2.jpg', // 城市天际线
+  'scene/scene-blog-2.jpg', // 循环（纯风景只有 10 张，凑满 12 个月）
   'scene/scene-fragments-2.jpg',
-  'scene/scene-glimmer.jpg',
-  'scene/scene-glimmer-2.jpg',
-  'scene/scene-friends.jpg',
-  'scene/scene-friends-2.jpg',
 ]
 
 /**
@@ -247,7 +247,8 @@ export const MONTH_COVERS = [
     line: 'rgba(255,255,255,0.35)',
     soft: 'rgba(150,180,255,0.15)',
     glow: 'rgba(190,215,255,0.3)',
-    overlay: 'rgba(6, 10, 20, 0.6)',
+    /* 12 月背景是给立绘当底的：压到 0.78，让照片退成氛围，人物才是主体 */
+    overlay: 'rgba(4, 7, 14, 0.78)',
   },
   scene: {
     image: `${BASE}wallpapers/${MONTH_BG[i]}`,

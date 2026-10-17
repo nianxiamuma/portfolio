@@ -191,7 +191,7 @@ export default function Hero() {
             立绘只剩半条腿露在外面（1440 宽实测）。现在让开左侧文案区，
             右侧还有名片卡（xl:right-14）和右上 wordmark，所以停在 32% 不会再往右撞。 */}
         {portraitOk && activeCover.portrait ? (
-          <div className="pointer-events-none absolute bottom-0 left-[38%] z-[38] hidden h-[86%] lg:block">
+          <div className="pointer-events-none absolute bottom-0 left-[74%] z-[38] hidden h-[92%] -translate-x-1/2 lg:block [mask-image:linear-gradient(to_bottom,black_86%,transparent_100%)]">
             <img
               src={activeCover.portrait}
               alt=""
@@ -217,20 +217,27 @@ export default function Hero() {
             z-50 而不是 z-40：下面那层主文案是 absolute inset-0 z-40，铺满全屏且在 DOM 里更靠后，
             同 z 值时它盖在名片卡上面，把卡里所有按钮的点击全吞掉（命中测试实测 reachable=false）。
             名片卡本来就是要浮在主文案之上的，所以给它更高的 z。 */}
-        <div className="absolute right-6 top-1/2 z-50 hidden -translate-y-1/2 lg:block xl:right-14">
+        <div className="absolute left-6 top-20 z-50 hidden origin-top-left scale-[0.92] md:left-14 md:top-24 lg:block">
           <HeroProfileCard />
         </div>
 
-        {/* 主文案 */}
-        <div className="absolute inset-0 z-40 flex flex-col justify-between px-6 pb-10 pt-28 md:px-14 md:pb-14">
+        {/* ── 5:5 分栏 ──
+            左半屏：小标签 / 名字 / 一句话 / 入口按钮 / 状态条
+            右半屏：立绘全身，站稳在灯光里
+            改名换姓地讲：原来的全屏 WELCOME 大字 + 中央立绘 + 右侧名片卡是三个等重的东西
+            抢同一块视线（1440 宽实测，人物被大字压穿、名片卡又贴着人物裙摆），
+            现在把文字全部收进左半屏，右半屏只放人——一个焦点。 */}
+        <div className="absolute inset-y-0 left-0 z-40 flex w-full flex-col justify-between px-6 pb-8 pt-24 md:w-1/2 md:px-14 md:pb-12 md:pt-28">
           <div className="flex-1" />
 
           <div>
-            <h1 className="text-[clamp(3.2rem,9vw,8rem)] font-extrabold leading-[0.88] tracking-tightest text-white">
-              WELCOME
+            <h1 className="text-[clamp(2.2rem,3.8vw,3.4rem)] font-extrabold leading-[1.06] tracking-tight text-white">
+              把喜欢的东西
+              <br />
+              <span className="text-neon-lime">留在手边</span>
             </h1>
-            <p className="mt-4 text-sm font-light text-white/70 md:text-base">
-              This is only the beginning
+            <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-white/60">
+              收藏、阅读、游戏，和一些写下来的东西。
             </p>
             <a
               href="#about"
