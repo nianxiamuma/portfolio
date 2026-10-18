@@ -28,10 +28,10 @@ export function BackgroundProvider({ children }) {
    */
   const [month, setMonth] = useState(() => activeMonth())
   /*
-   * 骰子点数：0 = 默认那张（剑），1–6 = 投出的点数，-1 = 让位给「按月」那套。
-   * 首页罗盘切月份时会被置回 -1，避免骰子和月份两个来源互相打架。
+   * 骰子点数：-1 = 还没投（主页用「当月形象」），1–6 = 投出的点数，0 = 默认那张（剑）。
+   * 只作用于 /home 站点索引页的背景，不影响首屏。
    */
-  const [diceFace, setDiceFace] = useState(0)
+  const [diceFace, setDiceFace] = useState(-1)
 
   // 换页时清掉区块覆盖，否则上一页的区块场景会跟着过来
   useEffect(() => {
@@ -108,7 +108,7 @@ export function useBackgroundScene() {
       sectionScene: null,
       month: activeMonth(),
       setMonth: () => {},
-      diceFace: 0,
+      diceFace: -1,
       setDiceFace: () => {},
     }
   )

@@ -10,12 +10,13 @@ const ICONS = {
 
 /**
  * Hero 里的个人名片卡（借鉴自参考站 rainzt.cn 的中央卡片）。
- * 头像 + 名字 + 一句话签名 + 快捷入口 + 社交，玻璃质感。
+ * 头像 + 名字 + 一句话签名 + 快捷入口 + 社交。
+ * 卡面全透明（不糊背景），只靠描边和投影与壁纸分层 —— 用户要求「模糊变成透明」。
  */
 export default function HeroProfileCard({ className = '' }) {
   return (
     <div
-      className={`w-[min(88vw,340px)] rounded-3xl border border-white/15 bg-white/[0.07] p-6 shadow-[0_28px_90px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl ${className}`}
+      className={`w-[min(88vw,340px)] rounded-3xl border border-white/15 bg-transparent p-6 shadow-[0_28px_90px_-28px_rgba(0,0,0,0.9)] ${className}`}
     >
       {/* 头像 */}
       <div className="relative mx-auto h-20 w-20">

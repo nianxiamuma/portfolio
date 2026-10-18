@@ -118,6 +118,8 @@ export default function Navbar() {
   }, [])
 
   const isHome = pathname === '/'
+  /* 导航里的「主页」指向 /home（站点索引页）；骰子只挂在那里 */
+  const isHomeIndex = pathname === '/home'
   const isActive = (item) =>
     item.end ? pathname === item.to : pathname.startsWith(item.to)
 
@@ -170,8 +172,8 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* 骰子：只在主页出现，投出的点数决定首屏用哪张壁纸 */}
-            {isHome ? <DiceToggle compact /> : null}
+            {/* 骰子：只在「主页」（/home 站点索引）出现，投出的点数决定那一页的壁纸 */}
+            {isHomeIndex ? <DiceToggle compact /> : null}
 
             {HAS_MUSIC && musicReady ? (
               <button

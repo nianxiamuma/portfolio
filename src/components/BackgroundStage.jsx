@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import WallpaperScene from './WallpaperScene'
 import { DEFAULT_SCENE, sceneImageCount, sceneWallpaper } from '../lib/backgrounds'
 import { useBackgroundScene } from '../context/BackgroundContext'
+import { getDiceWallpaper } from '../lib/diceWallpapers'
+import { getMonthCover } from '../lib/wallpapers'
 
 /**
  * 站点级背景层：钉在视口上（fixed），铺在所有页面内容下面。
@@ -20,7 +23,18 @@ export const ROTATE_MS = 45000
 const slotFor = (key, variant) => ({ key, variant })
 
 export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
-  const { scene, month } = useBackgroundScene()
+  const { scene, month, diceFace } = useBackgroundScene()
+  const { pathname } = useLocation()
+  /*
+   * 「主页」（/home 站点索引）的背景由骰子决定：
+   *   未投掷（-1）→ 当月形象（MONTH_COVERS 里当月那张）
+   *   1–6 / 0    → 骰子池对应那张
+   * 其余页面照旧走场景表。
+   */
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+  const routePath = base && pathname.startsWith(base) ? pathname.slice(base.length) || '/' : pathname
+  const homeIndex = routePath === '/home'
+  const homeWallpaper = () => (diceFace >= 0 ? getDiceWallpaper(diceFace) : getMonthCover(month))
 
   const [slots, setSlots] = useState(() => ({
     a: slotFor(scene, 0),
@@ -79,7 +93,10 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
     >
       <WallpaperScene
         wallpaper={
-          sceneWallpaper(slot.key, slot.variant, month) || sceneWallpaper(DEFAULT_SCENE, 0, month)
+          homeIndex
+            ? homeWallpaper()
+            : sceneWallpaper(slot.key, slot.variant, month) ||
+              sceneWallpaper(DEFAULT_SCENE, 0, month)
         }
       />
     </div>
