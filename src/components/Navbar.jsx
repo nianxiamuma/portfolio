@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+
+import DiceToggle from './DiceToggle'
 import { Menu, X, Music } from 'lucide-react'
 import VisitorNetworkBadge from './VisitorNetworkBadge'
 import ServerPulseBadge from './ServerPulseBadge'
@@ -167,6 +169,9 @@ export default function Navbar() {
                 ),
               )}
             </div>
+
+            {/* 骰子：只在主页出现，投出的点数决定首屏用哪张壁纸 */}
+            {isHome ? <DiceToggle compact /> : null}
 
             {HAS_MUSIC && musicReady ? (
               <button

@@ -6,7 +6,6 @@ import { ArrowUpRight } from 'lucide-react'
 
 import WallpaperScene from './WallpaperScene'
 import HeroWordmark from './HeroWordmark'
-import DiceToggle from './DiceToggle'
 import HeroProfileCard from './HeroProfileCard'
 import SiteWidgets from './SiteWidgets'
 import Petals from './Petals'
@@ -232,11 +231,6 @@ export default function Hero() {
             />
           </div>
         ) : null}
-
-        {/* 骰子：投出的点数决定首屏用哪张壁纸 */}
-        <div className="absolute right-6 top-[4.5rem] z-[41] md:right-14 md:top-[4.75rem]">
-          <DiceToggle />
-        </div>
 
         <HeroWordmark
           wallpaper={activeCover}
