@@ -27,6 +27,61 @@ export const MONTH_WALLPAPERS = {
     story: 'wallpapers/month/01-story.jpg',
     about: 'wallpapers/month/01-about.jpg',
   },
+  2: {
+    hero: 'wallpapers/month/02-hero.jpg',
+    story: 'wallpapers/month/02-story.jpg',
+    about: 'wallpapers/month/02-about.jpg',
+  },
+  3: {
+    hero: 'wallpapers/month/03-hero.jpg',
+    story: 'wallpapers/month/03-story.jpg',
+    about: 'wallpapers/month/03-about.jpg',
+  },
+  4: {
+    hero: 'wallpapers/month/04-hero.jpg',
+    story: 'wallpapers/month/04-story.jpg',
+    about: 'wallpapers/month/04-about.jpg',
+  },
+  5: {
+    hero: 'wallpapers/month/05-hero.jpg',
+    story: 'wallpapers/month/05-story.jpg',
+    about: 'wallpapers/month/05-about.jpg',
+  },
+  6: {
+    hero: 'wallpapers/month/06-hero.jpg',
+    story: 'wallpapers/month/06-story.jpg',
+    about: 'wallpapers/month/06-about.jpg',
+  },
+  7: {
+    hero: 'wallpapers/month/07-hero.jpg',
+    story: 'wallpapers/month/07-story.jpg',
+    about: 'wallpapers/month/07-about.jpg',
+  },
+  8: {
+    hero: 'wallpapers/month/08-hero.jpg',
+    story: 'wallpapers/month/08-story.jpg',
+    about: 'wallpapers/month/08-about.jpg',
+  },
+  9: {
+    hero: 'wallpapers/month/09-hero.jpg',
+    story: 'wallpapers/month/09-story.jpg',
+    about: 'wallpapers/month/09-about.jpg',
+  },
+  10: {
+    hero: 'wallpapers/month/10-hero.jpg',
+    story: 'wallpapers/month/10-story.jpg',
+    about: 'wallpapers/month/10-about.jpg',
+  },
+  11: {
+    hero: 'wallpapers/month/11-hero.jpg',
+    story: 'wallpapers/month/11-story.jpg',
+    about: 'wallpapers/month/11-about.jpg',
+  },
+  12: {
+    hero: 'wallpapers/month/12-hero.jpg',
+    story: 'wallpapers/month/12-story.jpg',
+    about: 'wallpapers/month/12-about.jpg',
+  },
 }
 
 /** 1–12 的标准月份号；非法日期收敛到 1，绝不返回 NaN */
