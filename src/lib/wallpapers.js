@@ -1,3 +1,5 @@
+import { activeMonth, monthWallpaper } from './monthWallpapers'
+
 /**
  * 四张 Hero 壁纸。
  *
@@ -251,7 +253,8 @@ export const MONTH_COVERS = [
     overlay: 'rgba(4, 7, 14, 0.78)',
   },
   scene: {
-    image: `${BASE}wallpapers/${MONTH_BG[i]}`,
+    /* 该月配了「主页壁纸」（壁纸 1）就用它；没配则回退月份背景池 */
+    image: monthWallpaper('hero', item.month) || `${BASE}wallpapers/${MONTH_BG[i]}`,
   },
 }))
 
@@ -264,7 +267,7 @@ export const getMonthCover = (index) =>
 
 /** 按访客当地月份返回 12 月方案的封面 index（罗盘仍可手动切换，此处只是初值） */
 export function monthlyCoverIndex(date = new Date()) {
-  const month = (typeof date?.getMonth === 'function' ? date.getMonth() : 0) + 1
+  const month = activeMonth(date)
   return MONTH_COVERS.find((item) => item.month === month)?.index || 1
 }
 

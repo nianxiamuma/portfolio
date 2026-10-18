@@ -31,9 +31,10 @@ export default function HomePage() {
       <HomeIntro />
       <Hero />
       <About />
+      {/* 信封区（From the desk of）挪到工具箱之前：下滑先读来信，再进工具列表 */}
+      <Story />
       <Features />
       <Segments />
-      <Story />
       <Contact />
     </>
   )

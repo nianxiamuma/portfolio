@@ -1,3 +1,5 @@
+import { activeMonth, monthWallpaper } from './monthWallpapers'
+
 /**
  * 背景场景表 —— 全站背景的唯一真源。
  *
@@ -39,6 +41,8 @@ export const SCENES = {
     name: '落花',
     dim: 0.45,
     images: ['scene-home-story.jpg', 'scene-home-story-2.jpg'],
+    // 信封区（图二）的壁纸按月替换；该月没配图时回退上面两张轮换
+    monthSlot: 'story',
   },
   'home-slot': { name: '暗翼', dim: 0.35, images: ['scene-home-slot.jpg', 'scene-home-slot-2.jpg'] },
   // 「片段」段原来复用 home-features，下滑到这一段背景不变；
@@ -48,7 +52,13 @@ export const SCENES = {
     dim: 0.4,
     images: ['scene-fragments.jpg', 'scene-fragments-2.jpg'],
   },
-  about: { name: '旧城', dim: 0.5, images: ['scene-about.jpg', 'scene-about-2.jpg'] },
+  about: {
+    name: '旧城',
+    dim: 0.5,
+    images: ['scene-about.jpg', 'scene-about-2.jpg'],
+    // 关于我页的壁纸按月替换（壁纸 3）；缺月回退上面两张轮换
+    monthSlot: 'about',
+  },
   glimmer: { name: '春信', dim: 0.4, images: ['scene-glimmer.jpg', 'scene-glimmer-2.jpg'] },
   collection: {
     name: '古街',
@@ -95,8 +105,10 @@ export function resolveScene(pathname) {
 }
 
 /** 场景有几张可轮换的图（至少 1，配错时空数组也不会把轮换逻辑除以零） */
-export function sceneImageCount(key) {
+export function sceneImageCount(key, date = new Date()) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
+  // 该月配了月度图时只有一张，不参与定时轮换
+  if (scene.monthSlot && monthWallpaper(scene.monthSlot, activeMonth(date))) return 1
   return Array.isArray(scene.images) && scene.images.length ? scene.images.length : 0
 }
 
@@ -113,15 +125,23 @@ export function wrapVariant(variant, count) {
  * 未知场景回落默认场景。
  * 注意 index 为 null —— 场景壁纸不在罗盘壁纸表里，没有罗盘序号。
  */
-export function sceneWallpaper(key, variant = 0) {
+export function sceneWallpaper(key, variant = 0, date = new Date()) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
+  const dim = typeof scene.dim === 'number' ? scene.dim : 0
+
+  // 月度槽位优先：当月配了图就整月用它，不参与 variant 轮换
+  const monthly = scene.monthSlot ? monthWallpaper(scene.monthSlot, activeMonth(date)) : null
+  if (monthly) {
+    return { index: null, name: scene.name, dim, scene: { image: monthly } }
+  }
+
   const images = Array.isArray(scene.images) ? scene.images : []
   if (!images.length) return null
 
   return {
     index: null,
     name: scene.name,
-    dim: typeof scene.dim === 'number' ? scene.dim : 0,
+    dim,
     scene: { image: `${BASE}wallpapers/scene/${images[wrapVariant(variant, images.length)]}` },
   }
 }
