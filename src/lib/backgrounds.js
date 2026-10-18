@@ -104,11 +104,18 @@ export function resolveScene(pathname) {
   return hit ? ROUTE_SCENES[hit] : DEFAULT_SCENE
 }
 
+/**
+ * 第三个参数两种含义：
+ *   传数字 = 「就用这个月」，查表不拐弯（测试与纯逻辑用）
+ *   传 Date / 不传 = 「现在该用哪个月」，走 activeMonth 的整套优先级
+ */
+const resolveMonth = (month) => (typeof month === 'number' ? month : activeMonth(month))
+
 /** 场景有几张可轮换的图（至少 1，配错时空数组也不会把轮换逻辑除以零） */
-export function sceneImageCount(key, date = new Date()) {
+export function sceneImageCount(key, month = new Date()) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
   // 该月配了月度图时只有一张，不参与定时轮换
-  if (scene.monthSlot && monthWallpaper(scene.monthSlot, activeMonth(date))) return 1
+  if (scene.monthSlot && monthWallpaper(scene.monthSlot, resolveMonth(month))) return 1
   return Array.isArray(scene.images) && scene.images.length ? scene.images.length : 0
 }
 
@@ -125,12 +132,12 @@ export function wrapVariant(variant, count) {
  * 未知场景回落默认场景。
  * 注意 index 为 null —— 场景壁纸不在罗盘壁纸表里，没有罗盘序号。
  */
-export function sceneWallpaper(key, variant = 0, date = new Date()) {
+export function sceneWallpaper(key, variant = 0, month = new Date()) {
   const scene = SCENES[key] || SCENES[DEFAULT_SCENE]
   const dim = typeof scene.dim === 'number' ? scene.dim : 0
 
   // 月度槽位优先：当月配了图就整月用它，不参与 variant 轮换
-  const monthly = scene.monthSlot ? monthWallpaper(scene.monthSlot, activeMonth(date)) : null
+  const monthly = scene.monthSlot ? monthWallpaper(scene.monthSlot, resolveMonth(month)) : null
   if (monthly) {
     return { index: null, name: scene.name, dim, scene: { image: monthly } }
   }

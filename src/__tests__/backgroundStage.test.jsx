@@ -56,10 +56,20 @@ describe('背景层 BackgroundStage', () => {
   })
 
   it('换页换成该页场景的图', () => {
-    const { container } = renderStage('/about')
-    expectFrontLayer(container, 'about')
+    const { container } = renderStage('/glimmer')
+    expectFrontLayer(container, 'glimmer')
     // 前提校验：这一条只有在两页确实不同时才有意义
-    expect(sceneImageOf('about')).not.toBe(sceneImageOf('home-hero'))
+    expect(sceneImageOf('glimmer')).not.toBe(sceneImageOf('home-hero'))
+  })
+
+  it('关于我页由月度壁纸（壁纸 3）接管，不再走场景图', () => {
+    window.history.replaceState({}, '', '/?month=1')
+    try {
+      const { container } = renderStage('/about')
+      expect(frontImage(container)).toContain('/wallpapers/month/01-about.jpg')
+    } finally {
+      window.history.replaceState({}, '', '/')
+    }
   })
 
   it('文章详情页沿用文章列表的图', () => {
@@ -78,19 +88,20 @@ describe('同场景轮换（每页多张图）', () => {
   it('同一页停留够久会换到下一张', () => {
     vi.useFakeTimers()
     try {
-      const { container } = renderStage('/about')
-      expect(frontImage(container)).toContain(sceneImageOf('about', 0))
+      // glimmer 没有月度槽位，任何月份都是两张场景图轮换
+      const { container } = renderStage('/glimmer')
+      expect(frontImage(container)).toContain(sceneImageOf('glimmer', 0))
 
       act(() => {
         vi.advanceTimersByTime(ROTATE_MS + 200)
       })
-      expect(frontImage(container)).toContain(sceneImageOf('about', 1))
+      expect(frontImage(container)).toContain(sceneImageOf('glimmer', 1))
 
-      // 再走一轮应绕回第一张（about 只有 2 张）
+      // 再走一轮应绕回第一张（glimmer 只有 2 张）
       act(() => {
         vi.advanceTimersByTime(ROTATE_MS + 200)
       })
-      expect(frontImage(container)).toContain(sceneImageOf('about', 0))
+      expect(frontImage(container)).toContain(sceneImageOf('glimmer', 0))
     } finally {
       vi.useRealTimers()
     }

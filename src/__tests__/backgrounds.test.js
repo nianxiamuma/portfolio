@@ -106,7 +106,7 @@ describe('场景表完整性', () => {
 
   it('每个场景都能取到一张合法壁纸', () => {
     // 用没配月度壁纸的月份，验证「回退到场景图」这条路径
-    const NO_MONTH = new Date(2026, 5, 15) // 6 月
+    const NO_MONTH = 6 // 6 月：没配月度图，走场景图轮换
     for (const key of Object.keys(SCENES)) {
       const wallpaper = sceneWallpaper(key, 0, NO_MONTH)
       expect(wallpaper).toBeTruthy()
@@ -120,7 +120,7 @@ describe('场景表完整性', () => {
   })
 
   it('variant 越界时绕回，不越界也不抛', () => {
-    const NO_MONTH = new Date(2026, 5, 15) // 6 月（glimmer 无月度槽位，与月份无关）
+    const NO_MONTH = 6 // 6 月：没配月度图，走场景图轮换
     const first = sceneWallpaper('glimmer', 0, NO_MONTH)
     const second = sceneWallpaper('glimmer', 1, NO_MONTH)
     expect(first.scene.image).not.toBe(second.scene.image)
@@ -138,7 +138,7 @@ describe('场景表完整性', () => {
   })
 
   it('每个场景都有图，且张数可查（轮换逻辑不能除以零）', () => {
-    const NO_MONTH = new Date(2026, 5, 15) // 6 月：没有月度图，走场景图轮换
+    const NO_MONTH = 6 // 6 月：没配月度图，走场景图轮换：没有月度图，走场景图轮换
     for (const [key, scene] of Object.entries(SCENES)) {
       expect(scene.images.length, key).toBeGreaterThan(0)
       expect(sceneImageCount(key, NO_MONTH)).toBe(scene.images.length)
@@ -146,34 +146,47 @@ describe('场景表完整性', () => {
   })
 
   it('月度壁纸接管：1 月信封区与关于我各换成一张当月图，不再轮换', () => {
-    const JAN = new Date(2026, 0, 15)
-    expect(sceneWallpaper('home-story', 0, JAN).scene.image).toContain(
+    expect(sceneWallpaper('home-story', 0, 1).scene.image).toContain(
       '/wallpapers/month/01-story.jpg',
     )
-    expect(sceneWallpaper('about', 0, JAN).scene.image).toContain('/wallpapers/month/01-about.jpg')
-    expect(sceneImageCount('home-story', JAN)).toBe(1)
-    expect(sceneImageCount('about', JAN)).toBe(1)
+    expect(sceneWallpaper('about', 0, 1).scene.image).toContain('/wallpapers/month/01-about.jpg')
+    expect(sceneImageCount('home-story', 1)).toBe(1)
+    expect(sceneImageCount('about', 1)).toBe(1)
     // 压暗强度沿用原场景，月度图不会把正文冲淡
-    expect(sceneWallpaper('about', 0, JAN).dim).toBe(SCENES.about.dim)
-    expect(sceneWallpaper('home-story', 0, JAN).dim).toBe(SCENES['home-story'].dim)
+    expect(sceneWallpaper('about', 0, 1).dim).toBe(SCENES.about.dim)
+    expect(sceneWallpaper('home-story', 0, 1).dim).toBe(SCENES['home-story'].dim)
   })
 
   it('没配月度壁纸的月份回退到场景图轮换', () => {
-    const JUN = new Date(2026, 5, 15)
-    expect(sceneWallpaper('home-story', 0, JUN).scene.image).toContain('/wallpapers/scene/')
-    expect(sceneWallpaper('about', 0, JUN).scene.image).toContain('/wallpapers/scene/')
-    expect(sceneImageCount('home-story', JUN)).toBe(SCENES['home-story'].images.length)
-    expect(sceneImageCount('about', JUN)).toBe(SCENES.about.images.length)
+    expect(sceneWallpaper('home-story', 0, 6).scene.image).toContain('/wallpapers/scene/')
+    expect(sceneWallpaper('about', 0, 6).scene.image).toContain('/wallpapers/scene/')
+    expect(sceneImageCount('home-story', 6)).toBe(SCENES['home-story'].images.length)
+    expect(sceneImageCount('about', 6)).toBe(SCENES.about.images.length)
+  })
+
+  it('不传月份时按「生效月份」走：只配了 1 月，整站就用 1 月这套', () => {
+    expect(sceneWallpaper('home-story').scene.image).toContain(
+      '/wallpapers/month/01-story.jpg',
+    )
+    expect(sceneWallpaper('about').scene.image).toContain('/wallpapers/month/01-about.jpg')
   })
 
   it('地址栏 ?month=N 时，场景按该月的壁纸走（预览用）', () => {
-    const JUN = new Date(2026, 5, 15)
     window.history.replaceState({}, '', '/?month=1')
     try {
-      expect(sceneWallpaper('home-story', 0, JUN).scene.image).toContain(
+      expect(sceneWallpaper('home-story').scene.image).toContain(
         '/wallpapers/month/01-story.jpg',
       )
-      expect(sceneImageCount('about', JUN)).toBe(1)
+      expect(sceneImageCount('about')).toBe(1)
+    } finally {
+      window.history.replaceState({}, '', '/')
+    }
+  })
+
+  it('?month=6（该月没配图）时如实回退场景图，不冒充 1 月', () => {
+    window.history.replaceState({}, '', '/?month=6')
+    try {
+      expect(sceneWallpaper('about').scene.image).toContain('/wallpapers/scene/')
     } finally {
       window.history.replaceState({}, '', '/')
     }

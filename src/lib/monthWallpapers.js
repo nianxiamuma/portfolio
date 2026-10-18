@@ -35,9 +35,48 @@ export function monthNumber(date = new Date()) {
   return Math.min(12, Math.max(1, m + 1))
 }
 
+/** 该月是否配了至少一张壁纸 */
+export function hasMonthWallpaper(month) {
+  const slots = MONTH_WALLPAPERS[Math.trunc(month)]
+  return Boolean(slots && MONTH_SLOTS.some((slot) => slots[slot]))
+}
+
+/** 已配置壁纸的月份列表（升序） */
+export function configuredMonths() {
+  return Object.keys(MONTH_WALLPAPERS)
+    .map(Number)
+    .filter((m) => Number.isInteger(m) && m >= 1 && m <= 12 && hasMonthWallpaper(m))
+    .sort((a, b) => a - b)
+}
+
 /**
- * 当前生效的月份：地址栏 `?month=N` 优先（用来提前预览某个月的壁纸），
- * 否则取给定日期的当月。没有 window（SSR / 单测）时只按日期算。
+ * 距离某月最近的已配置月份（按 12 个月环距算，跨年也算近）。
+ * 一个都没配时返回 null。
+ */
+export function nearestConfiguredMonth(month = monthNumber()) {
+  const months = configuredMonths()
+  if (!months.length) return null
+  const target = Math.trunc(month)
+  let best = months[0]
+  let bestDist = 13
+  for (const m of months) {
+    const raw = Math.abs(m - target) % 12
+    const dist = Math.min(raw, 12 - raw)
+    if (dist < bestDist) {
+      bestDist = dist
+      best = m
+    }
+  }
+  return best
+}
+
+/**
+ * 当前生效的壁纸月份。优先级：
+ *   1. 地址栏 `?month=N` —— 用来预览指定月份（哪怕该月还没配图，也会照实回退）
+ *   2. 访客当地月份，前提是那个月配了壁纸
+ *   3. 否则退到最近的已配置月份 —— 只配了 1 月时，全年都显示这套，
+ *      站长不必等自己生日那个月才看得到自己配的图
+ *   4. 一张都没配时返回当地月份（各区块全部走原有场景图）
  */
 export function activeMonth(date = new Date()) {
   if (typeof window !== 'undefined' && window.location) {
@@ -45,7 +84,9 @@ export function activeMonth(date = new Date()) {
     const n = Number(raw)
     if (Number.isInteger(n) && n >= 1 && n <= 12) return n
   }
-  return monthNumber(date)
+  const local = monthNumber(date)
+  if (hasMonthWallpaper(local)) return local
+  return nearestConfiguredMonth(local) ?? local
 }
 
 /**
