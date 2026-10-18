@@ -57,7 +57,7 @@ export default function Story() {
             </div>
 
             <div
-              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-void-900/80 px-7 py-10 backdrop-blur-sm md:px-12 md:py-14 ${
+              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-void-950/95 px-7 py-10 backdrop-blur-md md:px-12 md:py-14 ${
                 open ? 'story-envelope-cta--open' : 'opacity-0'
               }`}
             >

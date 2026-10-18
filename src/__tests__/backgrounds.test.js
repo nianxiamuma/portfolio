@@ -78,6 +78,19 @@ describe('pickActiveScene', () => {
     ).toBe('b')
   })
 
+  it('传了阈值时，区块露头就接管 —— 不必等它顶到视口顶端', () => {
+    const rects = [
+      { key: 'a', top: -2000, bottom: -1000 },
+      { key: 'b', top: 700, bottom: 1700 },
+    ]
+    // 默认阈值 0：b 还没盖过顶端，仍是 a
+    expect(pickActiveScene(rects)).toBe('a')
+    // 阈值 800：b 的顶部已进入判定线内，提前切到 b
+    expect(pickActiveScene(rects, 800)).toBe('b')
+    // 阈值不影响「更靠下的区块优先」这条规则
+    expect(pickActiveScene([{ key: 'c', top: 100 }, { key: 'd', top: 500 }], 800)).toBe('d')
+  })
+
   it('滚过全部区块后仍停留在最后一个', () => {
     expect(
       pickActiveScene([

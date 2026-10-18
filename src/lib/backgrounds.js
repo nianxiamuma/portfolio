@@ -39,7 +39,7 @@ export const SCENES = {
   },
   'home-story': {
     name: '落花',
-    dim: 0.45,
+    dim: 0.62,
     images: ['scene-home-story.jpg', 'scene-home-story-2.jpg'],
     // 信封区（图二）的壁纸按月替换；该月没配图时回退上面两张轮换
     monthSlot: 'story',
@@ -54,7 +54,7 @@ export const SCENES = {
   },
   about: {
     name: '旧城',
-    dim: 0.5,
+    dim: 0.65,
     images: ['scene-about.jpg', 'scene-about-2.jpg'],
     // 关于我页的壁纸按月替换（壁纸 3）；缺月回退上面两张轮换
     monthSlot: 'about',
@@ -157,17 +157,19 @@ export function sceneWallpaper(key, variant = 0, month = new Date()) {
  * 从「各区块相对视口的位置」中挑出当前生效的区块场景。
  *
  * rects 需按文档顺序给出（DOM 顺序），每项 { key, top }（top 来自 getBoundingClientRect）。
- * 规则：取最后一个 top <= 0 的区块 —— 也就是「已经把视口顶端盖过」的最靠下那个；
- * 还没滚到任何区块时返回 null，交回路由默认场景。
+ * 规则：取最后一个 top <= threshold 的区块；还没到任何区块时返回 null，交回路由默认场景。
+ *
+ * threshold 默认 0 = 「区块盖过视口顶端才切」。页面传一个更大的值（如视口 0.8 高），
+ * 背景就会在区块露头时提前切 —— 否则用户已经看见卡片了，壁纸还是上一张。
  *
  * 抽成纯函数是为了能在 jsdom 里直接测，不必真的滚动页面。
  */
-export function pickActiveScene(rects) {
+export function pickActiveScene(rects, threshold = 0) {
   if (!Array.isArray(rects)) return null
   let active = null
   for (const rect of rects) {
     if (!rect || typeof rect.top !== 'number' || !rect.key) continue
-    if (rect.top <= 0) active = rect.key
+    if (rect.top <= threshold) active = rect.key
   }
   return active
 }

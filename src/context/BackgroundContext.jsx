@@ -43,7 +43,9 @@ export function BackgroundProvider({ children }) {
       document.querySelectorAll(`[${SCENE_ATTR}]`).forEach((node) => {
         rects.push({ key: node.getAttribute(SCENE_ATTR), top: node.getBoundingClientRect().top })
       })
-      const next = pickActiveScene(rects)
+      // 判定线放在视口 80% 高度处：下一个区块露头就切背景。
+      // 用 0（区块顶到视口顶端）会有一段「卡片已经看见了，壁纸还是上一张」的空窗。
+      const next = pickActiveScene(rects, window.innerHeight * 0.8)
       if (next !== last) {
         last = next
         setSectionScene(next)
