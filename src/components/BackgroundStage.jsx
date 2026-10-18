@@ -20,7 +20,7 @@ export const ROTATE_MS = 45000
 const slotFor = (key, variant) => ({ key, variant })
 
 export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
-  const { scene } = useBackgroundScene()
+  const { scene, month } = useBackgroundScene()
 
   const [slots, setSlots] = useState(() => ({
     a: slotFor(scene, 0),
@@ -56,7 +56,7 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
     const id = window.setInterval(() => {
       setSlots((prev) => {
         const front = prev.frontIsA ? prev.a : prev.b
-        if (sceneImageCount(front.key) <= 1) return prev
+        if (sceneImageCount(front.key, month) <= 1) return prev
         const next = slotFor(front.key, front.variant + 1)
         return prev.frontIsA
           ? { a: prev.a, b: next, frontIsA: false }
@@ -64,7 +64,7 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
       })
     }, rotateMs)
     return () => window.clearInterval(id)
-  }, [reduceMotion, rotateMs])
+  }, [reduceMotion, rotateMs, month])
 
   const fade = reduceMotion ? '' : 'transition-opacity duration-700 ease-expo-out'
 
@@ -78,7 +78,9 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
       style={{ opacity: isFront ? 1 : 0 }}
     >
       <WallpaperScene
-        wallpaper={sceneWallpaper(slot.key, slot.variant) || sceneWallpaper(DEFAULT_SCENE, 0)}
+        wallpaper={
+          sceneWallpaper(slot.key, slot.variant, month) || sceneWallpaper(DEFAULT_SCENE, 0, month)
+        }
       />
     </div>
   )

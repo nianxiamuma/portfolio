@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { getMonthCover, monthlyCoverIndex } from '../lib/wallpapers'
+import { getMonthCover } from '../lib/wallpapers'
+import { useBackgroundScene } from '../context/BackgroundContext'
 
 /**
  * 开场：人物站在场景里不动，两扇门从两侧滑开露出她。
@@ -95,7 +96,8 @@ export default function HomeIntro() {
   }) // run | open | leaving | done
   const [progress, setProgress] = useState(0)
 
-  const cover = getMonthCover(monthlyCoverIndex())
+  const { month } = useBackgroundScene()
+  const cover = getMonthCover(month)
 
   useEffect(() => {
     if (phase !== 'run') return undefined

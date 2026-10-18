@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { DEFAULT_SCENE, pickActiveScene, resolveScene } from '../lib/backgrounds'
+import { activeMonth } from '../lib/monthWallpapers'
 
 /**
  * 当前生效的背景场景。
@@ -20,6 +21,12 @@ export function BackgroundProvider({ children }) {
   const { pathname } = useLocation()
   const routeScene = useMemo(() => resolveScene(pathname), [pathname])
   const [sectionScene, setSectionScene] = useState(null)
+  /*
+   * 全局「壁纸月份」。首屏罗盘切月份时写这里，信封区与关于我跟着换 ——
+   * 三处壁纸必须同一个月，否则会出现「首屏是 1 月、下面还是 10 月」。
+   * 初值走 activeMonth()：?month=N > 访客当月 > 最近的已配置月份。
+   */
+  const [month, setMonth] = useState(() => activeMonth())
 
   // 换页时清掉区块覆盖，否则上一页的区块场景会跟着过来
   useEffect(() => {
@@ -68,8 +75,8 @@ export function BackgroundProvider({ children }) {
   }, [pathname])
 
   const value = useMemo(
-    () => ({ scene: sectionScene || routeScene, routeScene, sectionScene }),
-    [sectionScene, routeScene],
+    () => ({ scene: sectionScene || routeScene, routeScene, sectionScene, month, setMonth }),
+    [sectionScene, routeScene, month],
   )
 
   return <BackgroundContext.Provider value={value}>{children}</BackgroundContext.Provider>
@@ -81,5 +88,13 @@ export function BackgroundProvider({ children }) {
  */
 export function useBackgroundScene() {
   const ctx = useContext(BackgroundContext)
-  return ctx || { scene: DEFAULT_SCENE, routeScene: DEFAULT_SCENE, sectionScene: null }
+  return (
+    ctx || {
+      scene: DEFAULT_SCENE,
+      routeScene: DEFAULT_SCENE,
+      sectionScene: null,
+      month: activeMonth(),
+      setMonth: () => {},
+    }
+  )
 }

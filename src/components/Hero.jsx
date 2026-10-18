@@ -9,11 +9,11 @@ import HeroWordmark from './HeroWordmark'
 import HeroProfileCard from './HeroProfileCard'
 import SiteWidgets from './SiteWidgets'
 import Petals from './Petals'
+import { useBackgroundScene } from '../context/BackgroundContext'
 import {
   COMPASS_TICKS,
   MONTH_COVERS,
   getMonthCover,
-  monthlyCoverIndex,
   compassCardStyle,
 } from '../lib/wallpapers'
 import {
@@ -28,7 +28,10 @@ gsap.registerPlugin(ScrollTrigger)
 const COMPASS_ITEMS = MONTH_COVERS.map(({ index, angle, label }) => ({ index, angle, label }))
 
 export default function Hero() {
-  const [current, setCurrent] = useState(() => monthlyCoverIndex())
+  // 罗盘选中的月份提到全局：切换时信封区与关于我一起换图
+  const { month, setMonth } = useBackgroundScene()
+  const current = month
+  const setCurrent = setMonth
   const [previous, setPrevious] = useState(1)
   const [hasSwitched, setHasSwitched] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)

@@ -1,9 +1,9 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { render, cleanup, act } from '@testing-library/react'
+import { render, cleanup, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
 import BackgroundStage, { ROTATE_MS } from '../components/BackgroundStage'
-import { BackgroundProvider, SCENE_ATTR } from '../context/BackgroundContext'
+import { BackgroundProvider, SCENE_ATTR, useBackgroundScene } from '../context/BackgroundContext'
 import { SCENES } from '../lib/backgrounds'
 import { WALLPAPERS } from '../lib/wallpapers'
 
@@ -81,6 +81,48 @@ describe('背景层 BackgroundStage', () => {
     const { container } = renderStage('/', <div {...{ [SCENE_ATTR]: 'home-about' }} />)
     expectFrontLayer(container, 'home-about')
     expect(sceneImageOf('home-about')).not.toBe(sceneImageOf('home-hero'))
+  })
+})
+
+/** 一个最小的「改月份」按钮，模拟首屏罗盘切换 */
+function MonthSwitcher({ month }) {
+  const { setMonth } = useBackgroundScene()
+  return (
+    <button type="button" onClick={() => setMonth(month)}>
+      switch-month
+    </button>
+  )
+}
+
+describe('月份联动（首屏罗盘 / 信封区 / 关于我 必须同一个月）', () => {
+  it('切到 3 月后，信封区背景跟着换成 03-story.jpg', () => {
+    const { container, getByText } = render(
+      <MemoryRouter>
+        <BackgroundProvider>
+          <MonthSwitcher month={3} />
+          <div {...{ [SCENE_ATTR]: 'home-story' }} />
+          <BackgroundStage />
+        </BackgroundProvider>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(getByText('switch-month'))
+    expect(frontImage(container)).toContain('/wallpapers/month/03-story.jpg')
+  })
+
+  it('切到 7 月后，关于我场景换成 07-about.jpg', () => {
+    // about 是路由场景，用 /about 进入
+    const { container, getByText } = render(
+      <MemoryRouter initialEntries={['/about']}>
+        <BackgroundProvider>
+          <MonthSwitcher month={7} />
+          <BackgroundStage />
+        </BackgroundProvider>
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(getByText('switch-month'))
+    expect(frontImage(container)).toContain('/wallpapers/month/07-about.jpg')
   })
 })
 
