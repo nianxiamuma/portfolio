@@ -57,7 +57,7 @@ export default function Story() {
             </div>
 
             <div
-              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-void-950/20 px-7 py-10 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:px-12 md:py-14 ${
+              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-transparent px-7 py-10 md:px-12 md:py-14 ${
                 open ? 'story-envelope-cta--open' : 'opacity-0'
               }`}
             >
@@ -91,13 +91,7 @@ export default function Story() {
                   </span>
                 </h2>
 
-                <p className="mt-6 max-w-xl text-sm leading-[1.9] text-slate-400">
-                  书架上的书、主机里的游戏、浏览器书签里那一长串工具站——
-                  它们曾经在各自的时刻接住过我。把它们摆在一起，
-                  算是给这些年一个可见的落点。
-                </p>
-
-                <div className="mt-8 flex flex-wrap items-center gap-4">
+                <div className="mt-9 flex flex-wrap items-center gap-4">
                   <Link
                     to="/about"
                     className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-semibold text-void-950 transition-all duration-500 ease-expo-out hover:shadow-glow-lime"

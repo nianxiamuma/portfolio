@@ -45,8 +45,9 @@ function TiltCard({ children, className = '', intensity = 7 }) {
 }
 
 export default function Features() {
+  // 不声明 data-bg-scene：背景沿用上一段（信封区，壁纸 2），让那张图一直铺到工具箱结束
   return (
-    <section id="features" data-bg-scene="home-features" className="relative py-24 lg:py-36">
+    <section id="features" className="relative py-24 lg:py-36">
       <div className="mx-auto max-w-shell px-6 md:px-10 lg:px-16">
         {/* 标题 */}
         <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
