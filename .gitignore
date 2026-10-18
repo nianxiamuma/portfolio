@@ -43,3 +43,9 @@ public/music/*
 # 已被 React 版取代的旧版单文件页面（保留在本地做参照，不入库）
 app.html
 preview.html
+
+# Python 素材工具产生的缓存与临时文件
+tools/wallpaper/__pycache__/
+*.pyc
+tools/wallpaper/_tmp_*
+tools/wallpaper/_layer.*
