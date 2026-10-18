@@ -57,7 +57,7 @@ export default function Story() {
             </div>
 
             <div
-              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-void-950/40 px-7 py-10 backdrop-blur-md md:px-12 md:py-14 ${
+              className={`relative overflow-hidden rounded-b-2xl border border-white/[0.08] bg-void-950/20 px-7 py-10 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] md:px-12 md:py-14 ${
                 open ? 'story-envelope-cta--open' : 'opacity-0'
               }`}
             >
@@ -69,13 +69,26 @@ export default function Story() {
                 </p>
                 <p className="mt-4 text-sm text-slate-400">致点开这个站的人：</p>
 
+                <span
+                  aria-hidden
+                  className="mt-7 block h-px w-16 bg-gradient-to-r from-neon-lime/80 to-transparent"
+                />
                 <h2
                   id="story-heading"
-                  className="mt-6 text-[clamp(1.5rem,3vw,2.4rem)] font-bold leading-snug tracking-tightest text-white"
+                  className="mt-5 font-serif italic leading-[1.06] tracking-[-0.015em]"
                 >
-                  这个站没什么宏大叙事，
-                  <br />
-                  只是不想让喜欢的东西散掉。
+                  <span className="block text-[clamp(0.95rem,1.7vw,1.2rem)] font-normal not-italic text-white/55">
+                    In case I don&rsquo;t see ya,
+                  </span>
+                  <span className="mt-3 block bg-gradient-to-r from-neon-lime via-neon-mint to-white bg-clip-text text-[clamp(1.7rem,3.9vw,3rem)] font-semibold text-transparent">
+                    good afternoon,
+                  </span>
+                  <span className="block bg-gradient-to-r from-neon-mint via-white to-neon-lime bg-clip-text text-[clamp(1.7rem,3.9vw,3rem)] font-semibold text-transparent">
+                    good evening,
+                  </span>
+                  <span className="block bg-gradient-to-r from-white via-neon-violet to-neon-mint bg-clip-text text-[clamp(1.7rem,3.9vw,3rem)] font-semibold text-transparent">
+                    and good night!
+                  </span>
                 </h2>
 
                 <p className="mt-6 max-w-xl text-sm leading-[1.9] text-slate-400">
