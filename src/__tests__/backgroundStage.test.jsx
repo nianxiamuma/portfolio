@@ -126,6 +126,23 @@ describe('月份联动（首屏罗盘 / 信封区 / 关于我 必须同一个月
   })
 })
 
+describe('骰子默认状态', () => {
+  it('未投掷时是「剑」那张（diceFace = 0），不是当月', () => {
+    function Probe() {
+      const { diceFace } = useBackgroundScene()
+      return <span data-testid="face">{diceFace}</span>
+    }
+    const { getByTestId } = render(
+      <MemoryRouter>
+        <BackgroundProvider>
+          <Probe />
+        </BackgroundProvider>
+      </MemoryRouter>,
+    )
+    expect(getByTestId('face').textContent).toBe('0')
+  })
+})
+
 describe('同场景轮换（每页多张图）', () => {
   it('同一页停留够久会换到下一张', () => {
     vi.useFakeTimers()
