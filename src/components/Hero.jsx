@@ -6,10 +6,12 @@ import { ArrowUpRight } from 'lucide-react'
 
 import WallpaperScene from './WallpaperScene'
 import HeroWordmark from './HeroWordmark'
+import DiceToggle from './DiceToggle'
 import HeroProfileCard from './HeroProfileCard'
 import SiteWidgets from './SiteWidgets'
 import Petals from './Petals'
 import { useBackgroundScene } from '../context/BackgroundContext'
+import { getDiceWallpaper } from '../lib/diceWallpapers'
 import {
   COMPASS_TICKS,
   MONTH_COVERS,
@@ -29,7 +31,7 @@ const COMPASS_ITEMS = MONTH_COVERS.map(({ index, angle, label }) => ({ index, an
 
 export default function Hero() {
   // 罗盘选中的月份提到全局：切换时信封区与关于我一起换图
-  const { month, setMonth } = useBackgroundScene()
+  const { month, setMonth, diceFace, setDiceFace } = useBackgroundScene()
   const current = month
   const setCurrent = setMonth
   const [previous, setPrevious] = useState(1)
@@ -50,7 +52,8 @@ export default function Hero() {
   const pointed = getMonthCover(pointedIndex)
   const theme = activeWallpaper.theme
   /* 12 月立绘：当前月份封面的人物立绘；逐张跟踪加载状态，失败的图隐藏、其他月份不受影响 */
-  const activeCover = getMonthCover(current)
+  /* 首屏壁纸：骰子点数 ≥ 0 时用骰子池那张（0 = 默认剑），-1 时回到按月封面 */
+  const activeCover = diceFace >= 0 ? getDiceWallpaper(diceFace) : getMonthCover(current)
   const [failedPortraits, setFailedPortraits] = useState(() => new Set())
   const portraitOk = activeCover.portrait && !failedPortraits.has(activeCover.portrait)
 
@@ -127,13 +130,15 @@ export default function Hero() {
   const selectWallpaper = useCallback(
     (next, { close = true } = {}) => {
       if (close) setSelectorOpen(false)
-      if (next === current) return
+      if (next === current && diceFace < 0) return
+      // 手动选月份 = 退出骰子模式，让三处回到按月壁纸
+      setDiceFace(-1)
       setPrevious(current)
       setHasSwitched(true)
       setIsTransitioning(true)
       setCurrent(next)
     },
-    [current],
+    [current, diceFace, setDiceFace],
   )
 
   const angleAt = (e) =>
@@ -171,7 +176,7 @@ export default function Hero() {
       <div ref={frameRef} className="relative z-10 h-dvh w-screen overflow-hidden bg-void-950">
         {/* 当前壁纸 */}
         <div ref={sceneRef} className="absolute inset-0">
-          <WallpaperScene wallpaper={getMonthCover(current)} />
+          <WallpaperScene wallpaper={activeCover} />
         </div>
 
         {/* 转场中的上一张 */}
@@ -228,8 +233,13 @@ export default function Hero() {
           </div>
         ) : null}
 
+        {/* 骰子：投出的点数决定首屏用哪张壁纸 */}
+        <div className="absolute right-6 top-[4.5rem] z-[41] md:right-14 md:top-[4.75rem]">
+          <DiceToggle />
+        </div>
+
         <HeroWordmark
-          wallpaper={getMonthCover(current)}
+          wallpaper={activeCover}
           className="right-6 top-24 md:right-14 md:top-32"
         />
 
