@@ -22,7 +22,7 @@ export const DICE_FACES = [1, 2, 3, 4, 5, 6]
 export const DICE_WALLPAPERS = {
   default: { name: '剑', image: 'wallpapers/dice/default-sword.jpg' },
   1: { name: '雏田', image: 'wallpapers/dice/1-hinata.jpg' },
-  2: { name: '玛琪玛', image: 'wallpapers/dice/2-makima.jpg' },
+  2: { name: '画眉丸', image: 'wallpapers/dice/2-gabimaru.jpg' },
   3: { name: '日落', image: 'wallpapers/dice/3-sunset.jpg' },
   4: { name: 'Saber', image: 'wallpapers/dice/4-saber.jpg' },
   5: { name: '初音未来', image: 'wallpapers/dice/5-miku.jpg' },
