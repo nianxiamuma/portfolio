@@ -70,8 +70,14 @@ const links: NavBarLink[] = resolveNavMenuLinks();
 
 // 右上角「返回主站」：博客 base 是 /portfolio/blog/，摘掉尾巴上的 blog 就是主站入口
 // （主站右上角「博客」指向本子站，两边各一个入口，来回都能切）
+// 本地开发：博客 dev(:4321) 与主站 vite(:5173) 是两个独立服务器，相对路径 /portfolio/
+// 在 4321 上是 404（实测），dev 下必须写对端完整地址；线上两者同域，用相对路径。
 const blogBase = import.meta.env.BASE_URL.replace(/\/+$/, "");
-const mainSiteHref = `${blogBase.replace(/\/blog$/, "")}/`;
+const MAIN_SITE_DEV_PORT = "5173";
+const mainSiteHref =
+	import.meta.env.DEV && Astro.url.port !== MAIN_SITE_DEV_PORT
+		? `${Astro.url.protocol}//${Astro.url.hostname}:${MAIN_SITE_DEV_PORT}/`
+		: `${blogBase.replace(/\/blog$/, "")}/`;
 
 // 处理导航栏 Logo 图片，image / url 类型支持亮暗色分别设置
 const logoConfig = siteConfig.navbar.logo;

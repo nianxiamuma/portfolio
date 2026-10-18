@@ -15,6 +15,7 @@ import {
 
 import SectionHeader from '../components/ui/SectionHeader'
 import { INDEX_GROUPS, cardsOf } from '../data/indexCards'
+import { blogEntryHref } from '../lib/siteLinks'
 
 /** 数据层只存 icon 字符串键，这里映射到具体图标组件（见 data/indexCards.js 的注释） */
 const ICONS = {
@@ -103,10 +104,13 @@ export default function HomeCardsPage() {
                 <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {cards.map((card, index) =>
                     card.external ? (
+                      // external 组目前只有博客子站（见 data/indexCards.js）。
+                      // href 不用卡片里的静态值，改由 blogEntryHref 解析：
+                      // 线上相对路径，本地 dev 指向 astro 的 4321 端口。
                       <a
                         key={card.id}
                         data-testid={`card-${card.id}`}
-                        href={card.href}
+                        href={blogEntryHref()}
                         className={CARD_CLASS}
                       >
                         <CardBody card={card} order={index + 1} />
