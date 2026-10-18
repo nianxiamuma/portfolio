@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { useBackgroundScene } from '../context/BackgroundContext'
 import { rollDie } from '../lib/diceWallpapers'
@@ -22,6 +22,26 @@ const PIPS = {
 export default function DiceToggle({ compact = false }) {
   const { diceFace, setDiceFace } = useBackgroundScene()
   const [rolling, setRolling] = useState(false)
+  const holdTimer = useRef(0)
+  const longPressed = useRef(false)
+
+  /** 长按 550ms = 复位：回到默认那张「剑」 */
+  const startHold = () => {
+    longPressed.current = false
+    if (holdTimer.current) window.clearTimeout(holdTimer.current)
+    holdTimer.current = window.setTimeout(() => {
+      longPressed.current = true
+      setRolling(false)
+      setDiceFace(0)
+    }, 550)
+  }
+
+  const cancelHold = () => {
+    if (holdTimer.current) {
+      window.clearTimeout(holdTimer.current)
+      holdTimer.current = 0
+    }
+  }
 
   const roll = () => {
     if (rolling) return
@@ -37,6 +57,15 @@ export default function DiceToggle({ compact = false }) {
     }, 70)
   }
 
+  const handleClick = () => {
+    // 长按已经复位过了，这一下 click 别再投一次
+    if (longPressed.current) {
+      longPressed.current = false
+      return
+    }
+    roll()
+  }
+
   const pips = PIPS[diceFace] || []
   const label = diceFace > 0 ? `D${diceFace}` : 'ROLL'
 
@@ -44,9 +73,14 @@ export default function DiceToggle({ compact = false }) {
     <div className={`flex items-end gap-1.5 ${compact ? "" : "flex-col"}`}>
       <button
         type="button"
-        onClick={roll}
+        onClick={handleClick}
+        onPointerDown={startHold}
+        onPointerUp={cancelHold}
+        onPointerLeave={cancelHold}
+        onPointerCancel={cancelHold}
+        onContextMenu={(e) => e.preventDefault()}
         aria-label="投骰子，换一张壁纸"
-        title="投骰子换壁纸"
+        title={compact ? '点击投骰子 · 长按回到「剑」' : '投骰子换壁纸 · 长按回到「剑」'}
         className={`group grid place-items-center ${compact ? "h-9 w-9" : "h-11 w-11"} rounded-xl border border-white/15 bg-white/[0.06] backdrop-blur-md transition-all duration-300 ease-expo-out hover:border-neon-lime/60 hover:bg-white/[0.1] active:scale-95 ${
           rolling ? 'animate-[spin_0.7s_linear_infinite] border-neon-lime/50' : ''
         }`}

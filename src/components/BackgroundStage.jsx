@@ -20,7 +20,7 @@ import { getMonthCover } from '../lib/wallpapers'
  */
 export const ROTATE_MS = 45000
 
-const slotFor = (key, variant) => ({ key, variant })
+const slotFor = (key, variant, dice) => ({ key, variant, dice })
 
 export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
   const { scene, month, diceFace } = useBackgroundScene()
@@ -34,11 +34,11 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
   const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
   const routePath = base && pathname.startsWith(base) ? pathname.slice(base.length) || '/' : pathname
   const homeIndex = routePath === '/home'
-  const homeWallpaper = () => (diceFace >= 0 ? getDiceWallpaper(diceFace) : getMonthCover(month))
+
 
   const [slots, setSlots] = useState(() => ({
-    a: slotFor(scene, 0),
-    b: slotFor(scene, 0),
+    a: slotFor(scene, 0, diceFace),
+    b: slotFor(scene, 0, diceFace),
     frontIsA: true,
   }))
   const [reduceMotion, setReduceMotion] = useState(false)
@@ -52,17 +52,17 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
     return () => mq.removeEventListener?.('change', update)
   }, [])
 
-  /* 场景变了：把新场景的第 0 张放进看不见的那一槽，再翻面 */
+  /* 场景或骰子点数变了：把新的那张放进看不见的槽，再翻面（长按复位也就有了渐变） */
   useEffect(() => {
     setSlots((prev) => {
       const front = prev.frontIsA ? prev.a : prev.b
-      if (front.key === scene) return prev
-      const next = slotFor(scene, 0)
+      if (front.key === scene && front.dice === diceFace) return prev
+      const next = slotFor(scene, 0, diceFace)
       return prev.frontIsA
         ? { a: prev.a, b: next, frontIsA: false }
         : { a: next, b: prev.b, frontIsA: true }
     })
-  }, [scene])
+  }, [scene, diceFace])
 
   /* 定时轮换：把同场景的下一张放进隐藏槽再翻面 */
   useEffect(() => {
@@ -70,15 +70,17 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
     const id = window.setInterval(() => {
       setSlots((prev) => {
         const front = prev.frontIsA ? prev.a : prev.b
+        // 「主页」的背景由骰子决定，不参与场景图的定时轮换
+        if (homeIndex) return prev
         if (sceneImageCount(front.key, month) <= 1) return prev
-        const next = slotFor(front.key, front.variant + 1)
+        const next = slotFor(front.key, front.variant + 1, front.dice)
         return prev.frontIsA
           ? { a: prev.a, b: next, frontIsA: false }
           : { a: next, b: prev.b, frontIsA: true }
       })
     }, rotateMs)
     return () => window.clearInterval(id)
-  }, [reduceMotion, rotateMs, month])
+  }, [reduceMotion, rotateMs, month, homeIndex])
 
   const fade = reduceMotion ? '' : 'transition-opacity duration-700 ease-expo-out'
 
@@ -94,7 +96,9 @@ export default function BackgroundStage({ rotateMs = ROTATE_MS }) {
       <WallpaperScene
         wallpaper={
           homeIndex
-            ? homeWallpaper()
+            ? slot.dice >= 0
+              ? getDiceWallpaper(slot.dice)
+              : getMonthCover(month)
             : sceneWallpaper(slot.key, slot.variant, month) ||
               sceneWallpaper(DEFAULT_SCENE, 0, month)
         }
