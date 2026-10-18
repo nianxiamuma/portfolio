@@ -1,0 +1,6 @@
+# Windows 批处理必须是 CRLF：cmd 解析 LF-only 的 .bat 会按字节错位
+# （中文与变量混排的行被截断，报「'正在打开' 不是内部或外部命令」这类假错误）。
+# 注意：blog/ 子站有自己的 .gitattributes（`* text=auto eol=lf`），
+# 目录越近的规则越优先，所以那边也补了一条 *.bat，别以为这里写了就够。
+*.bat text eol=crlf
+*.cmd text eol=crlf

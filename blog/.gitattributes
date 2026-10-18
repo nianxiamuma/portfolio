@@ -1,2 +1,7 @@
 *.js linguist-language=astro
 * text=auto eol=lf
+
+# Windows 批处理必须 CRLF：cmd 解析 LF-only 的 .bat 会按字节错位
+# （中文与变量混排的行被截断，报「'正在打开' 不是内部或外部命令」这类假错误）。
+# 上面那条 `* text=auto eol=lf` 会把 .bat 也压成 LF，所以单独放行。
+*.bat text eol=crlf
