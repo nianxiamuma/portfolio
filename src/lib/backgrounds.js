@@ -54,7 +54,8 @@ export const SCENES = {
   },
   about: {
     name: '旧城',
-    dim: 0.78,
+    /* 0.78 时整页亮度只剩 23（原图 121），壁纸原色被压没了；0.35 让颜色回来，仍比正文基底暗 */
+    dim: 0.35,
     images: ['scene-about.jpg', 'scene-about-2.jpg'],
     // 关于我页的壁纸按月替换（壁纸 3）；缺月回退上面两张轮换
     monthSlot: 'about',
