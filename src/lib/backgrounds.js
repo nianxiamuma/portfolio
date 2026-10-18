@@ -54,7 +54,7 @@ export const SCENES = {
   },
   about: {
     name: '旧城',
-    dim: 0.65,
+    dim: 0.78,
     images: ['scene-about.jpg', 'scene-about-2.jpg'],
     // 关于我页的壁纸按月替换（壁纸 3）；缺月回退上面两张轮换
     monthSlot: 'about',
