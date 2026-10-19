@@ -50,6 +50,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	// lrc: "[00:00.00]歌词内容...",
 	local: {
 		playlist: [
+			// 自带曲（保留）
 			{
 				name: "使一颗心免于哀伤",
 				artist: "知更鸟 / HOYO-MiX / Chevy",
@@ -57,6 +58,142 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 				cover: "/assets/music/cover/109951169585655912.webp",
 				lrc: "",
 			},
+			// 2026-10-20：D:\music\轻音乐 19 首（用户下载的网易云歌单曲目，LOCAL 来源即插即用）
+			
+			  {
+			    "name": "直到清晨黄昏",
+			    "artist": "Adoreya",
+			    "url": "/assets/music/local/Adoreya%20-%20%E7%9B%B4%E5%88%B0%E6%B8%85%E6%99%A8%E9%BB%84%E6%98%8F.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "いい日だったね。 (1)",
+			    "artist": "DEPAPEPE",
+			    "url": "/assets/music/local/DEPAPEPE%20-%20%E3%81%84%E3%81%84%E6%97%A5%E3%81%A0%E3%81%A3%E3%81%9F%E3%81%AD%E3%80%82%20%281%29.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "いい日だったね。",
+			    "artist": "DEPAPEPE",
+			    "url": "/assets/music/local/DEPAPEPE%20-%20%E3%81%84%E3%81%84%E6%97%A5%E3%81%A0%E3%81%A3%E3%81%9F%E3%81%AD%E3%80%82.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Represent feat. Kimbara Chieko",
+			    "artist": "DJ OKAWARI",
+			    "url": "/assets/music/local/DJ%20OKAWARI%20-%20Represent%20feat.%20Kimbara%20Chieko.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Past Lives",
+			    "artist": "Jasper,Martin Arteta,1111 Music Group",
+			    "url": "/assets/music/local/Jasper%2CMartin%20Arteta%2C1111%20Music%20Group%20-%20Past%20Lives.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "The truth that you leave",
+			    "artist": "Pianoboy高至豪",
+			    "url": "/assets/music/local/Pianoboy%E9%AB%98%E8%87%B3%E8%B1%AA%20-%20The%C2%A0truth%C2%A0that%C2%A0you%C2%A0leave.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "ãFREEãlucky",
+			    "artist": "Salder4cash",
+			    "url": "/assets/music/local/Salder4cash%20-%20%C3%A3FREE%C3%A3lucky.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Liekkas",
+			    "artist": "Sofia Jannok",
+			    "url": "/assets/music/local/Sofia%20Jannok%20-%20Liekkas.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "修炼森林",
+			    "artist": "StudioEIM",
+			    "url": "/assets/music/local/StudioEIM%20-%20%E4%BF%AE%E7%82%BC%E6%A3%AE%E6%9E%97.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "What A Difference A Day Made",
+			    "artist": "Timbo Mehrstein Gypsy Jazz Ensemble",
+			    "url": "/assets/music/local/Timbo%20Mehrstein%20Gypsy%20Jazz%20Ensemble%20-%20What%20A%20Difference%20A%20Day%20Made.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "《从你的全世界路过》插曲扒带",
+			    "artist": "ULY",
+			    "url": "/assets/music/local/ULY%20-%20%E3%80%8A%E4%BB%8E%E4%BD%A0%E7%9A%84%E5%85%A8%E4%B8%96%E7%95%8C%E8%B7%AF%E8%BF%87%E3%80%8B%E6%8F%92%E6%9B%B2%E6%89%92%E5%B8%A6.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "A Little Story",
+			    "artist": "Valentin",
+			    "url": "/assets/music/local/Valentin%20-%20A%20Little%20Story.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "ÇÉuÉÉ¹ÊuÇ uÉ Æuá´ÊÉÉ¯ (combination lock & Êpoqou)",
+			    "artist": "Êpoqou",
+			    "url": "/assets/music/local/%C3%8Apoqou%20-%20%C3%87%C3%89u%C3%89%C3%89%C2%B9%C3%8Au%C3%87%20u%C3%89%20%C3%86u%C3%A1%C2%B4%C3%8A%C3%89%C3%89%C2%AF%20%28combination%20lock%20%26%20%C3%8Apoqou%29.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Summer",
+			    "artist": "久石譲",
+			    "url": "/assets/music/local/%E4%B9%85%E7%9F%B3%E8%AD%B2%20-%20Summer.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "小心",
+			    "artist": "佳佳佳_zZ",
+			    "url": "/assets/music/local/%E4%BD%B3%E4%BD%B3%E4%BD%B3_zZ%20-%20%E5%B0%8F%E5%BF%83.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Night Cruising",
+			    "artist": "牛尾憲輔",
+			    "url": "/assets/music/local/%E7%89%9B%E5%B0%BE%E6%86%B2%E8%BC%94%20-%20Night%20Cruising.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "梦中的婚礼",
+			    "artist": "群星",
+			    "url": "/assets/music/local/%E7%BE%A4%E6%98%9F%20-%20%E6%A2%A6%E4%B8%AD%E7%9A%84%E5%A9%9A%E7%A4%BC.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "诀别书",
+			    "artist": "邓垚",
+			    "url": "/assets/music/local/%E9%82%93%E5%9E%9A%20-%20%E8%AF%80%E5%88%AB%E4%B9%A6.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  },
+			  {
+			    "name": "Refrain",
+			    "artist": "阿南亮子",
+			    "url": "/assets/music/local/%E9%98%BF%E5%8D%97%E4%BA%AE%E5%AD%90%20-%20Refrain.mp3",
+			    "cover": "",
+			    "lrc": ""
+			  }
+			
 		],
 	},
 };
