@@ -1,7 +1,7 @@
 import type { ProfileConfig } from "../types/profileConfig";
 
 export const profileConfig: ProfileConfig = {
-	// 头像：主站 public/avatar.jpg 的副本（2026-10-13 换的 IMG_6742）。
+	// 头像：夜晚暖光人像（C336A878...png 的居中裁方副本，2026-10-20）。
 	// 放在 src 目录下，由 Astro 自动优化成多尺寸 webp。
 	avatar: "assets/images/avatar.jpg",
 
