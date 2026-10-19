@@ -9,7 +9,7 @@ export const profileConfig: ProfileConfig = {
 	name: "年下牧马",
 
 	// 个人签名（与主站 tagline 同一句）
-	bio: "把喜欢的东西，留在手边。",
+	bio: "世界上美好的东西不太多，立秋傍晚从河对岸吹来的风，和二十来岁笑起来要人命的你。",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons

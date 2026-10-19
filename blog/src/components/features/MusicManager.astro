@@ -106,6 +106,9 @@ const managerConfigStr = JSON.stringify({
     var loadVersion = 0; // incremented on each loadTrack to discard stale play() results
     var state = {
         playlist: [],
+        // ── 双来源：local 自带曲 + meting 网易云歌单（下载文件到位后走 local 来源即插即用）──
+        sources: { local: [], meting: [] },
+        source: 'local', // 'local' | 'meting'
         currentIndex: 0,
         isPlaying: false,
         playMode: 0, // 0: list, 1: one, 2: random
@@ -130,8 +133,52 @@ const managerConfigStr = JSON.stringify({
         window.dispatchEvent(new CustomEvent(name, { detail: detail || {} }));
     }
 
+    // ── 来源切换（音乐盒的「自带 / 歌单」开关）────────────────
+    async function switchSource(name) {
+        if (name !== 'local' && name !== 'meting') return;
+        if (name === state.source) return;
+        state.source = name;
+
+        // 惰性拉取：第一次切到歌单时才请求 Meting API
+        if (name === 'meting' && state.sources.meting.length === 0 && config.meting) {
+            try {
+                await fetchMetingData();
+                state.sources.meting = state.playlist.slice();
+            } catch (e) {
+                console.warn('Meting playlist unavailable:', e);
+                state.source = 'local';
+            }
+        }
+
+        var wasPlaying = state.isPlaying;
+        state.playlist = state.sources[state.source] || [];
+        state.currentIndex = 0;
+        if (state.playMode === 2 && state.playlist.length > 0) {
+            state.currentIndex = Math.floor(Math.random() * state.playlist.length);
+        }
+        emit('fm:init', {
+            playlist: state.playlist,
+            playMode: state.playMode,
+            volume: state.volume,
+            isMuted: state.isMuted,
+            source: state.source
+        });
+        loadTrack(state.currentIndex, wasPlaying); // 换来源后保持播放状态
+    }
+
     // ── Meting fetch ─────────────────────────────────────────
     async function fetchMetingData() {
+        // 播放状态同步到 <html data-music-playing>，供头像乐谱线等全局装饰读取
+        function syncPlayingFlag(isPlaying) {
+            try {
+                if (isPlaying) {
+                    document.documentElement.setAttribute('data-music-playing', '');
+                } else {
+                    document.documentElement.removeAttribute('data-music-playing');
+                }
+            } catch (e) { /* SSR/极端环境忽略 */ }
+        }
+
         if (!config.meting) return;
         var m = config.meting;
         var apis = [m.api].concat(m.fallbackApis || []);
@@ -217,6 +264,7 @@ const managerConfigStr = JSON.stringify({
                 state.isPlaying = true;
                 state.error = null;
                 emit('fm:play-state', { isPlaying: true });
+                syncPlayingFlag(true);
             }).catch(function (e) {
                 if (ver !== loadVersion) return; // stale, discard
                 if (e.name === 'AbortError') return; // interrupted by new load
@@ -225,6 +273,7 @@ const managerConfigStr = JSON.stringify({
         } else {
             state.isPlaying = false;
             emit('fm:play-state', { isPlaying: false });
+            syncPlayingFlag(false);
         }
     }
 
@@ -270,6 +319,7 @@ const managerConfigStr = JSON.stringify({
             audio.play().then(function () {
                 state.isPlaying = true;
                 emit('fm:play-state', { isPlaying: true });
+                syncPlayingFlag(true);
             }).catch(function (e) {
                 if (e.name === 'AbortError') return;
                 console.warn('Playback failed:', e);
@@ -278,6 +328,7 @@ const managerConfigStr = JSON.stringify({
             audio.pause();
             state.isPlaying = false;
             emit('fm:play-state', { isPlaying: false });
+            syncPlayingFlag(false);
         }
     }
 
@@ -401,17 +452,29 @@ const managerConfigStr = JSON.stringify({
         }
     });
 
+    // 音乐盒切来源
+    listen('fm:switch-source', function (data) {
+        switchSource(data && data.source);
+    });
+
     // ── Init (idempotent) ────────────────────────────────────
     async function init() {
         if (state.initialized || state.initializing) return;
         state.initializing = true;
 
         try {
+            // local 曲目永远装载（用户要求：自带歌曲不要移除）
+            state.sources.local = config.localPlaylist || [];
+
+            // meting 歌单：mode=meting 时立即拉取；mode=local 时惰性拉取（切来源时再拉）
             if (config.mode === 'meting' && config.meting) {
                 await fetchMetingData();
-            } else if (config.mode === 'local') {
-                state.playlist = config.localPlaylist || [];
+                state.sources.meting = state.playlist.slice();
+                state.source = 'meting';
+            } else {
+                state.source = 'local';
             }
+            state.playlist = state.sources[state.source] || [];
 
             if (state.playlist.length > 0) {
                 // Apply volume
@@ -428,7 +491,8 @@ const managerConfigStr = JSON.stringify({
                     playlist: state.playlist,
                     playMode: state.playMode,
                     volume: state.volume,
-                    isMuted: state.isMuted
+                    isMuted: state.isMuted,
+                    source: state.source
                 });
 
                 loadTrack(startIndex, false);
@@ -449,7 +513,8 @@ const managerConfigStr = JSON.stringify({
                 playlist: [],
                 playMode: state.playMode,
                 volume: state.volume,
-                isMuted: state.isMuted
+                isMuted: state.isMuted,
+                source: state.source
             });
             emit('fm:error', { message: config.i18n.error });
         } finally {
@@ -478,11 +543,17 @@ const managerConfigStr = JSON.stringify({
                 lyrics: state.lyrics,
                 currentLrcIndex: state.currentLrcIndex,
                 initialized: state.initialized,
+                source: state.source,
+                sources: {
+                    local: state.sources.local.length,
+                    meting: state.sources.meting.length
+                },
                 error: state.error,
                 config: config
             };
         },
         togglePlay: togglePlay,
+        switchSource: switchSource,
         playNext: function () { playNext(false); },
         playPrev: playPrev,
         cyclePlayMode: cyclePlayMode,

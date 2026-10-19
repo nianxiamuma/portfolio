@@ -1,0 +1,110 @@
+/* ============================================================
+   个人风格化样式：玻璃卡片 + 头像跳动乐谱线
+   2026-10-20 —— 配合「武士少女」横幅（青蓝/橘红）与夜色头像
+   ============================================================ */
+
+/* ---------- 1. 玻璃卡片 ----------
+   亮色模式：白色 → 半透明蓝调玻璃 + 毛玻璃模糊
+   暗色模式：保持深色但同样加透明与模糊
+   横幅后的页面底色也染上壁纸的青蓝，避免边缘出现白色断层 */
+:root {
+	--page-bg: oklch(0.92 0.03 250);
+	--card-bg: unquote("rgb(235 244 250 / var(--card-transparent-opacity, 0.72))");
+	--card-bg-transparent: unquote("rgb(235 244 250 / var(--card-transparent-opacity, 0.55))");
+}
+
+:root.dark {
+	--page-bg: oklch(0.14 0.02 250);
+	--card-bg: unquote("rgb(18 24 34 / var(--card-transparent-opacity, 0.78))");
+	--card-bg-transparent: unquote("rgb(18 24 34 / var(--card-transparent-opacity, 0.62))");
+}
+
+/* 卡片玻璃态：半透明 + 背景模糊 + 细描边 */
+.card-base,
+.card-base-transparent {
+	backdrop-filter: blur(18px) saturate(1.35);
+	-webkit-backdrop-filter: blur(18px) saturate(1.35);
+	border: 1px solid rgb(255 255 255 / 0.18);
+	box-shadow:
+		0 8px 32px rgb(10 20 40 / 0.12);
+}
+
+:root.dark .card-base,
+:root.dark .card-base-transparent {
+	border-color: rgb(140 180 220 / 0.14);
+	box-shadow: 0 8px 32px rgb(0 0 0 / 0.35);
+}
+
+/* banner 底部渐变过渡，把壁纸的青蓝延伸到页面底色 */
+#banner-wrapper ~ #content-wrapper,
+#content-wrapper {
+	background: linear-gradient(
+		to bottom,
+		transparent 0%,
+		rgb(30 90 140 / 0.08) 12%,
+		var(--page-bg) 30%
+	);
+}
+
+/* ---------- 2. 头像跳动乐谱线 ----------
+   一排竖线立在头像底边。默认半透静止；
+   <html data-music-playing> 时逐根跳动（均衡器/乐谱风）。 */
+.music-staff {
+	pointer-events: none;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 40;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 3px;
+	height: 34px;
+	padding: 0 10px 0;
+	/* 头像底部微渐变，让线在亮图上也看得清 */
+	background: linear-gradient(to top, rgb(0 0 0 / 0.35), transparent);
+	border-radius: 0 0 var(--radius-xl, 0.75rem) var(--radius-xl, 0.75rem);
+}
+
+.music-staff span {
+	width: 3px;
+	border-radius: 2px 2px 0 0;
+	background: linear-gradient(to top, rgb(255 214 130 / 0.95), rgb(255 140 90 / 0.9));
+	height: 18%;
+	opacity: 0.55;
+	transition: opacity 0.4s ease;
+}
+
+/* 播放中：逐根跳动，每根相位错开 */
+:root[data-music-playing] .music-staff span {
+	opacity: 1;
+	animation: music-staff-bounce 1s ease-in-out infinite;
+}
+
+:root[data-music-playing] .music-staff span:nth-child(1)  { animation-delay: -0.00s; height: 30%; }
+:root[data-music-playing] .music-staff span:nth-child(2)  { animation-delay: -0.55s; height: 55%; }
+:root[data-music-playing] .music-staff span:nth-child(3)  { animation-delay: -0.90s; height: 75%; }
+:root[data-music-playing] .music-staff span:nth-child(4)  { animation-delay: -0.30s; height: 95%; }
+:root[data-music-playing] .music-staff span:nth-child(5)  { animation-delay: -0.70s; height: 60%; }
+:root[data-music-playing] .music-staff span:nth-child(6)  { animation-delay: -0.15s; height: 85%; }
+:root[data-music-playing] .music-staff span:nth-child(7)  { animation-delay: -0.45s; height: 45%; }
+:root[data-music-playing] .music-staff span:nth-child(8)  { animation-delay: -0.85s; height: 70%; }
+:root[data-music-playing] .music-staff span:nth-child(9)  { animation-delay: -0.25s; height: 35%; }
+:root[data-music-playing] .music-staff span:nth-child(10) { animation-delay: -0.60s; height: 50%; }
+:root[data-music-playing] .music-staff span:nth-child(11) { animation-delay: -0.95s; height: 28%; }
+
+@keyframes music-staff-bounce {
+	0%, 100% { transform: scaleY(0.45); }
+	35%      { transform: scaleY(1); }
+	65%      { transform: scaleY(0.7); }
+}
+
+/* 减少动效：保留外观，不跳动 */
+@media (prefers-reduced-motion: reduce) {
+	:root[data-music-playing] .music-staff span {
+		animation: none;
+		height: 40%;
+		opacity: 0.85;
+	}
+}

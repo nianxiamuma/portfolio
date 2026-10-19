@@ -37,11 +37,17 @@ const widgetId =
                     {i18n(I18nKey.music)}
                 </h3>
             </div>
-            <!-- Top Right: Lyric Toggle -->
-            <button class={`btn-lrc-toggle hover:text-(--primary) transition-all duration-300 p-0.5 pr-2 transform active:scale-95 text-neutral-400 shrink-0 ${!config.showLyrics ? 'hidden' : ''}`} title={i18n(I18nKey.musicLyrics)} aria-label={i18n(I18nKey.musicLyrics)}>
-                <Icon name="material-symbols:subtitles-off-outline-rounded" class="icon-lrc-off text-xl" aria-hidden="true" />
-                <Icon name="material-symbols:subtitles-outline-rounded" class="icon-lrc-on text-xl hidden" aria-hidden="true" />
-            </button>
+            <!-- Top Right: Source Toggle (音乐盒：自带曲 / 网易云歌单) + Lyric Toggle -->
+            <div class="flex items-center shrink-0">
+                <button class="btn-source-toggle hover:text-(--primary) transition-all duration-300 p-0.5 pr-1 transform active:scale-95 text-neutral-400 shrink-0"
+                        title="切换音乐来源" aria-label="切换音乐来源">
+                    <span class="text-[9px] font-mono tracking-wider px-1.5 py-0.5 rounded-md border border-current source-tag">LOCAL</span>
+                </button>
+                <button class={`btn-lrc-toggle hover:text-(--primary) transition-all duration-300 p-0.5 pr-2 transform active:scale-95 text-neutral-400 shrink-0 ${!config.showLyrics ? 'hidden' : ''}`} title={i18n(I18nKey.musicLyrics)} aria-label={i18n(I18nKey.musicLyrics)}>
+                    <Icon name="material-symbols:subtitles-off-outline-rounded" class="icon-lrc-off text-xl" aria-hidden="true" />
+                    <Icon name="material-symbols:subtitles-outline-rounded" class="icon-lrc-on text-xl hidden" aria-hidden="true" />
+                </button>
+            </div>
         </div>
 
         <div class="min-w-0 overflow-hidden">

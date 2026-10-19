@@ -9,13 +9,15 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	showInSidebar: true,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "local",
+	// 2026-10-20：切成 meting（网易云歌单）；local 曲目仍会装载（MusicManager 双来源，播放器里可切换）
+	mode: "meting",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
 
 	// 播放模式：'list'=列表循环, 'one'=单曲循环, 'random'=随机播放
-	playMode: "list",
+	// 2026-10-20：默认随机（你要的是歌单里随机播放）
+	playMode: "random",
 
 	// 是否显启用歌词
 	showLyrics: false,
@@ -30,7 +32,8 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 		// 类型：song=单曲, playlist=歌单, album=专辑, search=搜索, artist=艺术家
 		type: "playlist",
 		// 歌单/专辑/单曲 ID 或搜索关键词
-		id: "10046455237",
+		// 2026-10-20：换成「博客背景音乐」歌单（10 首纯音乐）
+		id: "2374411071",
 		// 认证 token（可选）
 		auth: "",
 		// 备用 API 配置（当主 API 失败时使用）

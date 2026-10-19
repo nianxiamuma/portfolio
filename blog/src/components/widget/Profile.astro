@@ -38,6 +38,10 @@ const className = Astro.props.class;
       widths={[350]}
       sizes="350px"
     />
+    {/* 跳动乐谱线：音乐播放时随节奏起伏（<html data-music-playing>，见 MusicManager） */}
+    <div class="music-staff" aria-hidden="true">
+      {Array.from({ length: 11 }).map(() => <span />)}
+    </div>
   </a>
   <div class="px-2">
     <div
