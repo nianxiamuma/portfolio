@@ -71,10 +71,23 @@
 	width: 3px;
 	border-radius: 2px 2px 0 0;
 	background: linear-gradient(to top, rgb(255 214 130 / 0.95), rgb(255 140 90 / 0.9));
-	height: 18%;
-	opacity: 0.55;
+	height: 34%;
+	opacity: 0.85;
 	transition: opacity 0.4s ease;
 }
+
+/* 默认（未播放）就有高低错落，静止可见；播放时叠加跳动 */
+.music-staff span:nth-child(1)  { height: 30%; }
+.music-staff span:nth-child(2)  { height: 55%; }
+.music-staff span:nth-child(3)  { height: 75%; }
+.music-staff span:nth-child(4)  { height: 95%; }
+.music-staff span:nth-child(5)  { height: 60%; }
+.music-staff span:nth-child(6)  { height: 85%; }
+.music-staff span:nth-child(7)  { height: 45%; }
+.music-staff span:nth-child(8)  { height: 70%; }
+.music-staff span:nth-child(9)  { height: 35%; }
+.music-staff span:nth-child(10) { height: 50%; }
+.music-staff span:nth-child(11) { height: 28%; }
 
 /* 播放中：逐根跳动，每根相位错开 */
 :root[data-music-playing] .music-staff span {
@@ -82,17 +95,17 @@
 	animation: music-staff-bounce 1s ease-in-out infinite;
 }
 
-:root[data-music-playing] .music-staff span:nth-child(1)  { animation-delay: -0.00s; height: 30%; }
-:root[data-music-playing] .music-staff span:nth-child(2)  { animation-delay: -0.55s; height: 55%; }
-:root[data-music-playing] .music-staff span:nth-child(3)  { animation-delay: -0.90s; height: 75%; }
-:root[data-music-playing] .music-staff span:nth-child(4)  { animation-delay: -0.30s; height: 95%; }
-:root[data-music-playing] .music-staff span:nth-child(5)  { animation-delay: -0.70s; height: 60%; }
-:root[data-music-playing] .music-staff span:nth-child(6)  { animation-delay: -0.15s; height: 85%; }
-:root[data-music-playing] .music-staff span:nth-child(7)  { animation-delay: -0.45s; height: 45%; }
-:root[data-music-playing] .music-staff span:nth-child(8)  { animation-delay: -0.85s; height: 70%; }
-:root[data-music-playing] .music-staff span:nth-child(9)  { animation-delay: -0.25s; height: 35%; }
-:root[data-music-playing] .music-staff span:nth-child(10) { animation-delay: -0.60s; height: 50%; }
-:root[data-music-playing] .music-staff span:nth-child(11) { animation-delay: -0.95s; height: 28%; }
+:root[data-music-playing] .music-staff span:nth-child(1)  { animation-delay: -0.00s; }
+:root[data-music-playing] .music-staff span:nth-child(2)  { animation-delay: -0.55s; }
+:root[data-music-playing] .music-staff span:nth-child(3)  { animation-delay: -0.90s; }
+:root[data-music-playing] .music-staff span:nth-child(4)  { animation-delay: -0.30s; }
+:root[data-music-playing] .music-staff span:nth-child(5)  { animation-delay: -0.70s; }
+:root[data-music-playing] .music-staff span:nth-child(6)  { animation-delay: -0.15s; }
+:root[data-music-playing] .music-staff span:nth-child(7)  { animation-delay: -0.45s; }
+:root[data-music-playing] .music-staff span:nth-child(8)  { animation-delay: -0.85s; }
+:root[data-music-playing] .music-staff span:nth-child(9)  { animation-delay: -0.25s; }
+:root[data-music-playing] .music-staff span:nth-child(10) { animation-delay: -0.60s; }
+:root[data-music-playing] .music-staff span:nth-child(11) { animation-delay: -0.95s; }
 
 @keyframes music-staff-bounce {
 	0%, 100% { transform: scaleY(0.45); }

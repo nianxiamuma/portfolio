@@ -6,7 +6,7 @@
 export const SITE = {
   name: '年下牧马',
   romaji: 'NIANXIA MUMA',
-  tagline: '世界上美好的东西不太多，立秋傍晚从河对岸吹来的风，和二十来岁笑起来要人命的你。',
+  tagline: '把喜欢的东西，留在手边。',
   // 部署基路径（GitHub Pages 项目页形如 /repo/）；字符串资源路径必须手动拼上它
   // 头像 2026-10-13 更换为 IMG_6742.JPG（存为 avatar.jpg；内容是 JPEG，别改成 .png 免得 MIME 与内容不符）
   avatar: `${import.meta.env.BASE_URL}avatar.jpg`,

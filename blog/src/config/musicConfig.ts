@@ -9,8 +9,9 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	showInSidebar: true,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	// 2026-10-20：切成 meting（网易云歌单）；local 曲目仍会装载（MusicManager 双来源，播放器里可切换）
-	mode: "meting",
+	// 2026-10-20：全用本地曲库（用户下载的 19 首 + 自带 1 首）。
+	// 在线歌单解析在无登录态下大半曲目播不出来，体验差，故不再默认走 meting。
+	mode: "local",
 
 	// 默认音量 (0-1)
 	volume: 0.7,

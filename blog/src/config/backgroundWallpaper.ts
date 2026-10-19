@@ -73,9 +73,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			titleSize: "4.5rem",
 			// 主页横幅副标题
 			subtitle: [
-				"把喜欢的东西，留在手边。",
-				"写代码，也写点别的。",
-				"记录折腾，偶尔碎碎念。",
+				"世界上美好的东西不太多，立秋傍晚从河对岸吹来的风，和二十来岁笑起来要人命的你。",
 			],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",

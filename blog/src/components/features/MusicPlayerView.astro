@@ -115,8 +115,6 @@ const viewConfigStr = JSON.stringify({
             iconLrcOff: widget.querySelector('.icon-lrc-off'),
             lrcDrawer: widget.querySelector('.lrc-drawer'),
             lrcContainer: widget.querySelector('.lrc-container'),
-            btnSource: widget.querySelector('.btn-source-toggle'),
-            sourceTag: widget.querySelector('.source-tag'),
             btnDrawer: widget.querySelector('.btn-drawer-toggle'),
             playlistDrawer: widget.querySelector('.playlist-drawer'),
             playlistContainer: widget.querySelector('.playlist-container'),
@@ -530,15 +528,7 @@ const viewConfigStr = JSON.stringify({
             window.addEventListener(name, fn);
         }
 
-        var currentSource = 'local';
-
         on('fm:init', function (e) {
-            // 来源标签：LOCAL / NETEASE（音乐盒风格）
-            if (e.detail && e.detail.source && ui.sourceTag) {
-                currentSource = e.detail.source;
-                ui.sourceTag.textContent = currentSource === 'meting' ? 'NETEASE' : 'LOCAL';
-                ui.sourceTag.classList.toggle('text-neon-lime', currentSource === 'meting');
-            }
 
             var d = e.detail;
             setLoading(false);
@@ -592,12 +582,6 @@ const viewConfigStr = JSON.stringify({
 
         // ── Button click delegates ───────────────────────────────
         ui.btnPlay.addEventListener('click', function () { mgr.togglePlay(); });
-        // 音乐盒：自带曲 / 网易云歌单 切换
-        if (ui.btnSource) {
-            ui.btnSource.addEventListener('click', function () {
-                mgr.switchSource(currentSource === 'local' ? 'meting' : 'local');
-            });
-        }
         ui.btnNext.addEventListener('click', function () { mgr.playNext(); });
         ui.btnPrev.addEventListener('click', function () { mgr.playPrev(); });
         ui.btnRepeat.addEventListener('click', function () { mgr.cyclePlayMode(); });
